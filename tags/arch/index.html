@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>My Blog</title>
+    <title>Tags: arch | My Blog</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -37,8 +37,6 @@
 
 
 
-
-<script src="/js/lib/home.js"></script>
 
 <link rel="stylesheet" href="/css/main.css" />
 
@@ -148,173 +146,62 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            <div id="home-head">
-    <div id="home-background" ref="homeBackground" data-images="/images/background.jpg"></div>
-    <div id="home-info" @click="homeClick">
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="info">
-            <div class="wrap">
-                <h1>My Blog</h1>
-                <h3></h3>
-                <h5></h5>
+            <div id="archives">
+    
+    <div class="categories-tags">
+        
+        
+        
+        <span>
+            <a href="/tags/blog-operation/" style="background: #00a596">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                blog-operation
+            </a>
+        </span>
+        
+        
+        
+        <span>
+            <a href="/tags/arch/" style="background: linear-gradient(120deg, #9abbf7 0%, #ffbbf4 100%)">
+                <span class="icon">
+                    <i class="fa-solid fa-tags fa-fw"></i>
+                </span>
+                arch
+            </a>
+        </span>
+        
+        
+        
+        
+    </div>
+    
+    <div class="timeline">
+        <div class="timeline-tail"></div>
+        <div class="timeline-content">
+            <div class="item-time">2024/4/3</div>
+            <a href="/2024/04/03/arch%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+                <h3>arch常用命令</h3>
+            </a>
+            <div class="info">
+                
+                
+                <span class="tags">
+                    <span class="icon">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </span>
+                    
+                    
+                    <span class="tag">
+                        
+                        <a href="/tags/arch/" style="color: #03a9f4">arch</a>
+                    </span>
+                    
+                </span>
+                
             </div>
-        </span>
-    </div>
-</div>
-<div id="home-posts-wrap" true ref="homePostsWrap">
-    <div id="home-posts">
-        
-
-<div class="post">
-    <a href="/2024/04/03/arch%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-        <h2 class="post-title">arch常用命令</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2024/4/3
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <hr>
-<p>Arch 常用命令</p>
-<pre><code>&lt;!-- more --&gt;
-</code></pre>
-<h1 id="Pacman"><a href="#Pacman" class="headerlink" title="Pacman"></a>Pacman</h1><p><strong>Pacman</strong>是一个软件包管理器，作为Arch Linux发行版的一部分。它最早由Arch Linux的Judd Vinet开发。Pacman可以解决安装过程中的依赖问题，自动下载并且安装所有需要的软件包。</p>
-<pre><code class="bash">pacman -Ss packagename 	#查询
-pacman -S packagename	#安装
-pacman -Q				#列出已安装的软件包
-pacman -Qs package		#查询已安装的包
-pacman -Syu				#更新软件源
-pacman -R package_name  #删除单个软件包，保留其全部已经安装的依赖关系
-pacman -Rs package_name #删除指定软件包，及其所有没有被其他已安装软件包使用的依赖关系
-pacman -Rsc package_name#删除软件包和所有依赖这个软件包的程序
-
-</code></pre>
-<h1 id="yay"><a href="#yay" class="headerlink" title="yay"></a>yay</h1><p>Yet Another Yogurt: 一个用于 Arch Linux 的工具，用于从 Arch User Repository 中构建和安装软件包.</p>
-<pre><code class="bash">yay -S &#123;&#123;软件包&#125;&#125;  		#从仓库和 AUR 中安装一个新的软件包
-yay -Sua				  #只同步和更新 AUR 软件包
-yay -Ss &#123;&#123;关键词&#125;&#125;			#从仓库和 AUR 中搜索软件包数据库中的关键词
-yay -Ps					  #显示已安装软件包和系统健康状况的统计数据
-</code></pre>
-<h1 id="systemctl"><a href="#systemctl" class="headerlink" title="systemctl"></a>systemctl</h1><pre><code class="bash">systemctl enable servicename		#添加自启动
-systemctrl disable servicename		#删除服务
-</code></pre>
-
-            
         </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/arch/" style="color: #00bcd4">arch</a>
-        </span>
-        
-    </div>
-    <a href="/2024/04/03/arch%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2024/04/03/Blog-Operation/">
-        <h2 class="post-title">Blog Operation</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            2024/4/3
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <span id="more"></span>
-
-<h1 id="1-blog-new-article"><a href="#1-blog-new-article" class="headerlink" title="1. blog new article"></a>1. blog new article</h1><hr>
-<pre><code class="bash">hexo new &#39;article name&#39;  #新建文章
-</code></pre>
-<h1 id="2-blog-update"><a href="#2-blog-update" class="headerlink" title="2. blog update"></a>2. blog update</h1><pre><code class="bash">hexo g	#先生成
-hexo s  #本地查看
-hexo d	#部署到github上
-</code></pre>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/blog-operation/" style="color: #03a9f4">blog-operation</a>
-        </span>
-        
-    </div>
-    <a href="/2024/04/03/Blog-Operation/" class="go-post">阅读全文</a>
-</div>
-
-
-        <div class="page-current">
-    
-    <span class="current">1</span>
-    
-    
-    
-    
-</div>
-
-    </div>
-    
-    <div id="home-card">
-        <div id="card-style">
-    <div id="card-div">
-        <div class="avatar">
-            <img src="/images/avatar.jpg" alt="avatar" />
-        </div>
-        <div class="name">段雨超</div>
-        <div class="description">
-            <p>Description<br>…</p>
-
-        </div>
-        
-        
-        <div class="friend-links">
-            
-            <div class="friend-link">
-                <a target="_blank" rel="noopener" href="https://luckyy-code.github.io/">Argvchs</a>
-            </div>
-            
-        </div>
-        
-    </div>
-</div>
-
     </div>
     
 </div>
