@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>My Blog</title>
+    <title>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存 | My Blog</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -38,7 +38,9 @@
 
 
 
-<script src="/js/lib/home.js"></script>
+
+
+
 
 <link rel="stylesheet" href="/css/main.css" />
 
@@ -148,32 +150,11 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            <div id="home-head">
-    <div id="home-background" ref="homeBackground" data-images="/images/background.jpg"></div>
-    <div id="home-info" @click="homeClick">
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="loop"></span>
-        <span class="info">
-            <div class="wrap">
-                <h1>My Blog</h1>
-                <h3></h3>
-                <h5></h5>
-            </div>
-        </span>
+            <div class="article">
+    <div>
+        <h1>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h1>
     </div>
-</div>
-<div id="home-posts-wrap" true ref="homePostsWrap">
-    <div id="home-posts">
-        
-
-<div class="post">
-    <a href="/2024/04/03/Beyond-%E6%96%87%E6%A1%A3%E4%B8%80-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8B%86%E5%88%86-%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84-%E6%9C%8D%E5%8A%A1%E5%88%9D%E5%A7%8B%E5%8C%96-%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B-jwt%E9%AA%8C%E8%AF%81-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%B3%A8%E5%86%8C-%E7%BC%93%E5%AD%98/">
-        <h2 class="post-title">Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h2>
-    </a>
-    <div class="category-and-date">
-        
+    <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -182,156 +163,152 @@
         </span>
         
         
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <h3 id="Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存"><a href="#Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存" class="headerlink" title="Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存"></a>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h3>
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Beyond/" style="color: #00a596">Beyond</a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/golang/" style="color: #ffa2c4">golang</a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #03a9f4">文档</a>
-        </span>
-        
-    </div>
-    <a href="/2024/04/03/Beyond-%E6%96%87%E6%A1%A3%E4%B8%80-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8B%86%E5%88%86-%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84-%E6%9C%8D%E5%8A%A1%E5%88%9D%E5%A7%8B%E5%8C%96-%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B-jwt%E9%AA%8C%E8%AF%81-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%B3%A8%E5%86%8C-%E7%BC%93%E5%AD%98/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2024/04/03/arch%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
-        <h2 class="post-title">arch常用命令</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
+        <span class="tags">
             <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
+                <i class="fa-solid fa-tags fa-fw"></i>
             </span>
-            2024/4/3
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
             
-            <p>Arch常用命令</p>
             
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/arch/" style="color: #00bcd4">arch</a>
-        </span>
-        
-    </div>
-    <a href="/2024/04/03/arch%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2024/04/03/Blog-Operation/">
-        <h2 class="post-title">Blog Operation</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #03a9f4">Beyond</a>
             </span>
-            2024/4/3
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
             
-            <p>blog operation</p>
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+            </span>
             
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <i class="fa-solid fa-tags fa-fw"></i>
-        </span>
-        
-        
-        
-        <span class="tag">
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ffa2c4">文档</a>
+            </span>
             
-            <a href="/tags/blog-operation/" style="color: #00bcd4">blog-operation</a>
         </span>
         
     </div>
-    <a href="/2024/04/03/Blog-Operation/" class="go-post">阅读全文</a>
-</div>
+    
+    <div class="content" v-pre>
+        <h3 id="Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存"><a href="#Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存" class="headerlink" title="Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存"></a>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h3><span id="more"></span>
 
+<h2 id="服务拆分"><a href="#服务拆分" class="headerlink" title="服务拆分"></a>服务拆分</h2><p>微服务倡导将单体服务划分成一组小服务，服务之间采用轻量级的通信机制相互配合、相互协调，为用户提供最终价值。每个服务运行在独立的进程中，围绕具体业务进行构建并且能够独立部署到生产环境中。</p>
+<p>服务划分</p>
+<table>
+<thead>
+<tr>
+<th align="center">用户服务</th>
+<th>关注服务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">文章服务</td>
+<td>点赞服务</td>
+</tr>
+</tbody></table>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><pre><code class="shell">[feng@myarch beyond]$ tree -L 1 
+.
+├── application
+├── db
+├── mysql
+├── pkg
+└── README.md
 
-        <div class="page-current">
-    
-    <span class="current">1</span>
-    
-    
-    
-    
-</div>
+[feng@myarch beyond]$ tree -L 2
+.
+├── application
+│   ├── applet
+│   ├── article
+│   ├── follow
+│   ├── like
+│   └── user
+├── db
+├── pkg
+│   ├── encrypt
+│   ├── jwt
+│   ├── orm
+│   ├── util
+│   └── xcode
+└── README.md
+
+</code></pre>
+<h3 id="生成api服务"><a href="#生成api服务" class="headerlink" title="生成api服务"></a>生成api服务</h3><pre><code class="shell">cd ~/beyond/application/applet
+mkdir pb;cd pb
+goctl api go -api *.api -dir ../ --style=goZero
+</code></pre>
+<pre><code class="shell">[feng@myarch application]$ tree -L 3
+.
+├── applet
+│   ├── applet.go
+│   ├── etc
+│   │   └── applet-api.yaml
+│   ├── internal
+│   │   ├── config
+│   │   ├── handler
+│   │   ├── logic
+│   │   ├── svc
+│   │   └── types
+│   └── pb
+│       └── applet.api
+├── article
+├── follow
+├── like
+└── user        
+
+├── db
+├── pkg
+│   ├── encrypt
+│   ├── jwt
+│   ├── orm
+│   ├── util
+│   └── xcode
+└── README.md
+</code></pre>
+<h3 id="生成rpc项目"><a href="#生成rpc项目" class="headerlink" title="生成rpc项目"></a>生成rpc项目</h3><pre><code class="shell">cd ~/beyond/application/user
+mkdir pb;cd pb
+goctl rpc protoc *.proto --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
+</code></pre>
+<pre><code class="shell">[feng@myarch user]$ tree ./rpc/ 
+./rpc/
+├── etc
+│   └── user.yaml
+├── internal
+│   ├── config
+│   │   └── config.go
+│   ├── logic
+│   │   ├── findByIdLogic.go
+│   │   ├── findByMobileLogic.go
+│   │   ├── registerLogic.go
+│   │   └── sendSmsLogic.go
+│   ├── server
+│   │   └── userServer.go
+│   └── svc
+│       └── serviceContext.go
+├── pb
+│   ├── user_grpc.pb.go
+│   ├── user.pb.go
+│   └── user.proto
+├── user
+│   └── user.go
+└── user.go
+</code></pre>
+<h3 id="生成model"><a href="#生成model" class="headerlink" title="生成model"></a>生成model</h3><pre><code class="shell">cd /beyond/application/user/rpc
+goctl model mysql datasource --dir ./internal/model --table user --cache true --url &quot;root&quot; 123456@tcp(127.0.0.1:3306)/beyond_user&quot;
+</code></pre>
+<pre><code class="Shell">tree ./internal/model
+
+./internal/model
+├── usermodel.go
+├── usermodel_gen.go
+└── vars.go
+</code></pre>
 
     </div>
     
-    <div id="home-card">
-        <div id="card-style">
-    <div id="card-div">
-        <div class="avatar">
-            <img src="/images/avatar.jpg" alt="avatar" />
-        </div>
-        <div class="name">段雨超</div>
-        <div class="description">
-            <p>Description<br>…</p>
-
-        </div>
-        
-        
-        <div class="friend-links">
-            
-            <div class="friend-link">
-                <a target="_blank" rel="noopener" href="https://luckyy-code.github.io/">Argvchs</a>
-            </div>
-            
-        </div>
-        
-    </div>
-</div>
-
-    </div>
+    
+    
+    
+    
+    
     
 </div>
 
@@ -369,6 +346,12 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
 
     
 </body>
