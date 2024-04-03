@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <link rel="icon" href="/images/avatar.jpg" />
 
-    <link rel="stylesheet" href="/css/<file>" />
+
     <link rel="preconnect" href="https://s4.zstatic.net" />
 <script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
 <link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -171,7 +171,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/arch/" style="color: #03a9f4">arch</a>
+                <a href="/tags/arch/" style="color: #ffa2c4">arch</a>
             </span>
             
         </span>
@@ -185,24 +185,24 @@
 
 
 <h1 id="Pacman"><a href="#Pacman" class="headerlink" title="Pacman"></a>Pacman</h1><p><strong>Pacman</strong>是一个软件包管理器，作为Arch Linux发行版的一部分。它最早由Arch Linux的Judd Vinet开发。Pacman可以解决安装过程中的依赖问题，自动下载并且安装所有需要的软件包。</p>
-<pre><code class="bash">pacman -Ss packagename 	#查询
+<pre><code class="bash">pacman -Ss packagename	#查询
 pacman -S packagename	#安装
-pacman -Q				#列出已安装的软件包
-pacman -Qs package		#查询已安装的包
-pacman -Syu				#更新软件源
-pacman -R package_name  #删除单个软件包，保留其全部已经安装的依赖关系
-pacman -Rs package_name #删除指定软件包，及其所有没有被其他已安装软件包使用的依赖关系
+pacman -Q		#列出已安装的软件包
+pacman -Qs package	#查询已安装的包
+pacman -Syu		#更新软件源
+pacman -R package_name	#删除单个软件包，保留其全部已经安装的依赖关系
+pacman -Rs package_name	#删除指定软件包，及其所有没有被其他已安装软件包使用的依赖关系
 pacman -Rsc package_name#删除软件包和所有依赖这个软件包的程序
 
 </code></pre>
 <h1 id="yay"><a href="#yay" class="headerlink" title="yay"></a>yay</h1><p>Yet Another Yogurt: 一个用于 Arch Linux 的工具，用于从 Arch User Repository 中构建和安装软件包.</p>
-<pre><code class="bash">yay -S &#123;&#123;软件包&#125;&#125;  		#从仓库和 AUR 中安装一个新的软件包
-yay -Sua				  #只同步和更新 AUR 软件包
-yay -Ss &#123;&#123;关键词&#125;&#125;			#从仓库和 AUR 中搜索软件包数据库中的关键词
-yay -Ps					  #显示已安装软件包和系统健康状况的统计数据
+<pre><code class="bash">yay -S &#123;&#123;软件包&#125;&#125;	#从仓库和 AUR 中安装一个新的软件包
+yay -Sua		#只同步和更新 AUR 软件包
+yay -Ss &#123;&#123;关键词&#125;&#125;	#从仓库和 AUR 中搜索软件包数据库中的关键词
+yay -Ps			#显示已安装软件包和系统健康状况的统计数据
 </code></pre>
-<h1 id="systemctl"><a href="#systemctl" class="headerlink" title="systemctl"></a>systemctl</h1><pre><code class="bash">systemctl enable servicename		#添加自启动
-systemctrl disable servicename		#删除服务
+<h1 id="systemctl"><a href="#systemctl" class="headerlink" title="systemctl"></a>systemctl</h1><pre><code class="bash">systemctl enable servicename	#添加自启动
+systemctrl disable servicename	#删除服务
 </code></pre>
 
     </div>
