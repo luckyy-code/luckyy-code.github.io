@@ -171,17 +171,17 @@
             
             <span class="tag">
                 
-                <a href="/tags/Beyond/" style="color: #ff7d73">Beyond</a>
+                <a href="/tags/Beyond/" style="color: #03a9f4">Beyond</a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+                <a href="/tags/golang/" style="color: #ff7d73">golang</a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #03a9f4">文档</a>
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ffa2c4">文档</a>
             </span>
             
         </span>
@@ -292,7 +292,24 @@ goctl rpc protoc *.proto --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=g
 │   └── user.go
 └── user.go
 </code></pre>
-<h3 id="生成model"><a href="#生成model" class="headerlink" title="生成model"></a>生成model</h3><pre><code class="shell">cd /beyond/application/user/rpc
+<h3 id="生成model"><a href="#生成model" class="headerlink" title="生成model"></a>生成model</h3><p>首先创建表</p>
+<pre><code class="sql">create database beyond_user;
+use beyond_user;
+
+CREATE TABLE `user` (
+                        `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT &#39;主键ID&#39;,
+                        `username` varchar(32) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;用户名&#39;,
+                        `avatar` varchar(256) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;头像&#39;,
+                        `mobile` varchar(128) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;手机号&#39;,
+                        `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#39;创建时间&#39;,
+                        `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &#39;最后修改时间&#39;,
+                        PRIMARY KEY (`id`),
+                        KEY `ix_update_time` (`update_time`),
+                        UNIQUE KEY `uk_mobile` (`mobile`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT=&#39;用户表&#39;;
+</code></pre>
+<p>生成model命令</p>
+<pre><code class="shell">cd /beyond/application/user/rpc
 goctl model mysql datasource --dir ./internal/model --table user --cache true --url &quot;root&quot; 123456@tcp(127.0.0.1:3306)/beyond_user&quot;
 </code></pre>
 <pre><code class="Shell">tree ./internal/model
