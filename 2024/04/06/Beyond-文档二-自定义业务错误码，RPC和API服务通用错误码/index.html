@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Beyond 文档二 文件上传&amp;&amp;对接阿里OSS&amp;&amp;文章发布 | My Blog</title>
+    <meta name="author" content="段雨超" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar.jpg" />
+
+
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>MY BLOG</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;MY BLOG</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>Beyond 文档二 文件上传&amp;&amp;对接阿里OSS&amp;&amp;文章发布</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/6
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #ffa2c4">Beyond</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ff7d73">文档</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h3 id="Beyond-文档二-文件上传-对接阿里OSS-文章发布"><a href="#Beyond-文档二-文件上传-对接阿里OSS-文章发布" class="headerlink" title="Beyond 文档二 文件上传&amp;&amp;对接阿里OSS&amp;&amp;文章发布"></a>Beyond 文档二 文件上传&amp;&amp;对接阿里OSS&amp;&amp;文章发布</h3><span id="more"></span>
+
+<h3 id="创建文章表"><a href="#创建文章表" class="headerlink" title="创建文章表"></a>创建文章表</h3><pre><code class="sql">create database beyond_article;
+use beyond_article;
+
+CREATE TABLE `article` (
+                           `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT &#39;主键ID&#39;,
+                           `title` varchar(255) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;标题&#39;,
+                           `content` text COLLATE utf8_unicode_ci NOT NULL COMMENT &#39;内容&#39;,
+                           `cover` varchar(255) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;封面&#39;,
+                           `description` varchar(255) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;描述&#39;,
+                           `author_id` bigint(20) UNSIGNED NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;作者ID&#39;,
+                           `status` tinyint(4) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;状态 0:待审核 1:审核不通过 2:可见 3:用户删除&#39;,
+                           `comment_num` int(11) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;评论数&#39;,
+                           `like_num` int(11) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;点赞数&#39;,
+                           `collect_num` int(11) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;收藏数&#39;,
+                           `view_num` int(11) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;浏览数&#39;,
+                           `share_num` int(11) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;分享数&#39;,
+                           `tag_ids` varchar(255) NOT NULL DEFAULT &#39;&#39; COMMENT &#39;标签ID&#39;,
+                           `publish_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#39;发布时间&#39;,
+                           `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &#39;创建时间&#39;,
+                           `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &#39;最后修改时间&#39;,
+                           PRIMARY KEY (`id`),
+                           KEY `ix_author_id` (`author_id`),
+                           KEY `ix_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT=&#39;文章表&#39;;
+</code></pre>
+<h3 id="对接阿里云OSS"><a href="#对接阿里云OSS" class="headerlink" title="对接阿里云OSS"></a>对接阿里云OSS</h3><p>进入阿里云oss官网创建Bucket，然后获取密钥。</p>
+<p><img src="https://telegraph-image-d8w.pages.dev/file/b7f4614e19e5f7cfb887a.png"></p>
+<p>定义article.api文件</p>
+<pre><code class="go">syntax = &quot;v1&quot;
+
+type (
+    UploadCoverResponse &#123;
+        CoverUrl string `json:&quot;cover_url&quot;`
+    &#125;
+
+    PublishRequest &#123;
+        Title       string `json:&quot;title&quot;`
+        Content     string `json:&quot;content&quot;`
+        Description string `json:&quot;description&quot;`
+        Cover       string `json:&quot;cover&quot;`
+    &#125;
+
+    PublishResponse &#123;
+        ArticleId int64 `json:&quot;article_id&quot;`
+    &#125;
+    ArticleDetailRequest &#123;
+        ArticleId int64 `form:&quot;article_id&quot;`
+    &#125;
+
+    ArticleDetailResponse &#123;
+        Title       string `json:&quot;title&quot;`
+        Content     string `json:&quot;content&quot;`
+        Description string `json:&quot;description&quot;`
+        Cover       string `json:&quot;cover&quot;`
+        AuthorId    string `json:&quot;author_id&quot;`
+        AuthorName  string `json:&quot;author_name&quot;`
+    &#125;
+)
+
+@server (
+    prefix: /v1/article
+    jwt:    Auth
+
+)
+service article-api &#123;
+    @handler UploadCoverHandler
+    post /upload/cover returns (UploadCoverResponse)
+    @handler PublishHandler
+    post /publish (PublishRequest) returns (PublishResponse)
+    @handler ArticleDetailHandler
+    get /detail (ArticleDetailRequest) returns (ArticleDetailResponse)
+&#125;
+</code></pre>
+<h4 id="goctl生成article-api服务"><a href="#goctl生成article-api服务" class="headerlink" title="goctl生成article-api服务"></a>goctl生成article-api服务</h4><pre><code class="shell">cd ~/beyond/application/article/api
+mkdir pb;cd pb
+goctl api go -api *.api -dir ../ --style=goZero
+</code></pre>
+<p>article-api目录</p>
+<pre><code class="shell"> tree -L 3
+.
+├── article.go
+├── etc
+│   └── article-api.yaml
+├── internal
+│   ├── code
+│   │   └── code.go
+│   ├── config
+│   │   └── config.go
+│   ├── handler
+│   │   ├── articleDetailHandler.go
+│   │   ├── publishHandler.go
+│   │   ├── routes.go
+│   │   └── uploadCoverHandler.go
+│   ├── logic
+│   │   ├── articleDetailLogic.go
+│   │   ├── publishLogic.go
+│   │   └── uploadCoverLogic.go
+│   ├── svc
+│   │   └── serviceContext.go
+│   └── types
+│       └── types.go
+└── pb
+    └── article.api
+
+</code></pre>
+<h4 id="OSS配置"><a href="#OSS配置" class="headerlink" title="OSS配置"></a>OSS配置</h4><pre><code class="go">Oss struct &#123;
+   Endpoint         string
+   AccessKeyId      string
+   AccessKeySecret  string
+   BucketName       string
+   ConnectTimeout   int64 `json:&quot;,optional&quot;`
+   ReadWriteTimeout int64 `json:&quot;,optional&quot;`
+&#125;
+</code></pre>
+<h4 id="OSS初始化"><a href="#OSS初始化" class="headerlink" title="OSS初始化"></a>OSS初始化</h4><pre><code class="go">package svc
+
+import (
+   &quot;beyond/application/article/api/internal/config&quot;
+
+   &quot;github.com/aliyun/aliyun-oss-go-sdk/oss&quot;
+)
+
+const (
+   defaultOssConnectTimeout   = 1
+   defaultOssReadWriteTimeout = 3
+)
+
+type ServiceContext struct &#123;
+   Config    config.Config
+   OssClient *oss.Client
+&#125;
+
+func NewServiceContext(c config.Config) *ServiceContext &#123;
+   if c.Oss.ConnectTimeout == 0 &#123;
+      c.Oss.ConnectTimeout = defaultOssConnectTimeout
+   &#125;
+   if c.Oss.ReadWriteTimeout == 0 &#123;
+      c.Oss.ReadWriteTimeout = defaultOssReadWriteTimeout
+   &#125;
+   oc, err := oss.New(c.Oss.Endpoint, c.Oss.AccessKeyId, c.Oss.AccessKeySecret,
+      oss.Timeout(c.Oss.ConnectTimeout, c.Oss.ReadWriteTimeout))
+   if err != nil &#123;
+      panic(err)
+   &#125;
+
+   return &amp;ServiceContext&#123;
+      Config:    c,
+      OssClient: oc,
+   &#125;
+&#125;
+</code></pre>
+<h4 id="上传文件核心逻辑"><a href="#上传文件核心逻辑" class="headerlink" title="上传文件核心逻辑"></a>上传文件核心逻辑</h4><pre><code class="go">func (l *UploadCoverLogic) UploadCover(req *http.Request) (*types.UploadCoverResponse, error) &#123;
+   _ = req.ParseMultipartForm(maxFileSize)
+   file, handler, err := req.FormFile(&quot;cover&quot;)
+   if err != nil &#123;
+      return nil, err
+   &#125;
+   defer file.Close()
+
+   bucket, err := l.svcCtx.OssClient.Bucket(l.svcCtx.Config.Oss.BucketName)
+   if err != nil &#123;
+      logx.Errorf(&quot;get bucket failed, err: %v&quot;, err)
+      return nil, code.GetBucketErr
+   &#125;
+   objectKey := genFilename(handler.Filename)
+   err = bucket.PutObject(objectKey, file)
+   if err != nil &#123;
+      logx.Errorf(&quot;put object failed, err: %v&quot;, err)
+      return nil, code.PutBucketErr
+   &#125;
+
+   return &amp;types.UploadCoverResponse&#123;CoverUrl: genFileURL(objectKey)&#125;, nil
+&#125;
+
+func genFilename(filename string) string &#123;
+   return fmt.Sprintf(&quot;%d_%s&quot;, time.Now().UnixMilli(), filename)
+&#125;
+
+func genFileURL(objectKey string) string &#123;
+   return fmt.Sprintf(&quot;https://beyond-article.oss-cn-shanghai.aliyuncs.com/%s&quot;, objectKey)
+&#125;
+</code></pre>
+<h3 id="goclt生成article-rpc服务代码"><a href="#goclt生成article-rpc服务代码" class="headerlink" title="goclt生成article-rpc服务代码"></a>goclt生成article-rpc服务代码</h3><pre><code class="shell">cd ~/beyond/application/article/rpc/pb
+goctl rpc protoc *.proto --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
+</code></pre>
+<h3 id="goclt生成model代码"><a href="#goclt生成model代码" class="headerlink" title="goclt生成model代码"></a>goclt生成model代码</h3><pre><code class="shell">cd ~/beyond/application/article/rpc
+goctl model mysql datasource --dir ./internal/model --table article --url &quot;root:123456@tcp(0.0.0.0:3306)/beyond_article&quot;
+</code></pre>
+<p>执行完上述代码生成命令后，整个代码结构如下：</p>
+<pre><code class="shell">./
+├── article
+│   └── article.go
+├── article.go
+├── article.proto
+├── etc
+│   └── article.yaml
+├── internal
+│   ├── config
+│   │   └── config.go
+│   ├── logic
+│   │   └── publishlogic.go
+│   ├── model
+│   │   ├── articlemodel.go
+│   │   ├── articlemodel_gen.go
+│   │   └── vars.go
+│   ├── server
+│   │   └── articleserver.go
+│   └── svc
+│       └── servicecontext.go
+└── pb
+    ├── article.pb.go
+    └── article_grpc.pb.go
+</code></pre>
+<h3 id="初始化mysql-client"><a href="#初始化mysql-client" class="headerlink" title="初始化mysql client"></a>初始化mysql client</h3><pre><code class="go">~/beyond/application/article/rpc/internal/svc/servicecontext.go
+
+
+type ServiceContext struct &#123;
+   Config       config.Config
+   ArticleModel model.ArticleModel
+&#125;
+
+func NewServiceContext(c config.Config) *ServiceContext &#123;
+   return &amp;ServiceContext&#123;
+      Config:       c,
+      ArticleModel: model.NewArticleModel(sqlx.NewMysql(c.DataSource)),
+   &#125;
+&#125;
+</code></pre>
+<h3 id="写入文章数据"><a href="#写入文章数据" class="headerlink" title="写入文章数据"></a>写入文章数据</h3><pre><code class="go">~/beyond/application/article/rpc/internal/logic/publishlogic.go:27
+
+func (l *PublishLogic) Publish(in *pb.PublishRequest) (*pb.PublishResponse, error) &#123;
+   ret, err := l.svcCtx.ArticleModel.Insert(l.ctx, &amp;model.Article&#123;
+      AuthorId:    in.UserId,
+      Title:       in.Title,
+      Content:     in.Content,
+      Description: in.Description,
+      Cover:       in.Cover,
+   &#125;)
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;Publish Insert req: %v error: %v&quot;, in, err)
+      return nil, err
+   &#125;
+
+   articleId, err := ret.LastInsertId()
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;LastInsertId error: %v&quot;, err)
+      return nil, err
+   &#125;
+
+   return &amp;pb.PublishResponse&#123;ArticleId: articleId&#125;, nil
+&#125;
+</code></pre>
+<h3 id="测试文章发布"><a href="#测试文章发布" class="headerlink" title="测试文章发布"></a>测试文章发布</h3><p>准备工作启动etcd、mysql、redis</p>
+<p>启动user-rpc和applet-api</p>
+<p>启动article-rpc和article-api</p>
+<p><img src="https://telegraph-image-d8w.pages.dev/file/c97e1fe9e613f92cf4102.png"></p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 My Blog
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;段雨超
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+    <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script type="text/javascript" src="/js/fireworks.js"></script>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
+
+    
+</body>
+</html>
