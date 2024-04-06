@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存 | My Blog</title>
+    <title>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 | My Blog</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -152,7 +152,7 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
     <div>
-        <h1>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h1>
+        <h1>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -171,7 +171,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Beyond/" style="color: #03a9f4">Beyond</a>
+                <a href="/tags/Beyond/" style="color: #ff7d73">Beyond</a>
             </span>
             
             <span class="tag">
@@ -181,7 +181,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ffa2c4">文档</a>
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #03a9f4">文档</a>
             </span>
             
         </span>
@@ -189,10 +189,11 @@
     </div>
     
     <div class="content" v-pre>
-        <h3 id="Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存"><a href="#Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册-缓存" class="headerlink" title="Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存"></a>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册 &amp;&amp; 缓存</h3><span id="more"></span>
+        <h3 id="Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册"><a href="#Beyond-文档一-微服务拆分-项目结构-服务初始化-调用流程-jwt验证-验证码注册" class="headerlink" title="Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册"></a>Beyond 文档一 微服务拆分&amp;&amp;项目结构 &amp;&amp; 服务初始化 &amp;&amp; 调用流程 &amp;&amp; jwt验证 &amp;&amp; 验证码注册</h3><span id="more"></span>
 
 <h2 id="服务拆分"><a href="#服务拆分" class="headerlink" title="服务拆分"></a>服务拆分</h2><p>微服务倡导将单体服务划分成一组小服务，服务之间采用轻量级的通信机制相互配合、相互协调，为用户提供最终价值。每个服务运行在独立的进程中，围绕具体业务进行构建并且能够独立部署到生产环境中。</p>
-<p>服务划分</p>
+<h3 id="服务划分"><a href="#服务划分" class="headerlink" title="服务划分"></a>服务划分</h3><p>按照所在的职能部门，独立业务功能进行划分，比如评论服务，用户服务，购物车服务等就可以独立的划分为一个微服务。</p>
+<p>文章(article)<strong>独立为一个微服务，</strong>用户(user)<strong>可以独立为一个微服务，</strong>点赞(like)<strong>独立为一个微服务，</strong>关注(follow)独立为一个微服务</p>
 <table>
 <thead>
 <tr>
@@ -301,6 +302,21 @@ goctl model mysql datasource --dir ./internal/model --table user --cache true --
 ├── usermodel_gen.go
 └── vars.go
 </code></pre>
+<h3 id="启动rpc服务和api服务"><a href="#启动rpc服务和api服务" class="headerlink" title="启动rpc服务和api服务"></a>启动rpc服务和api服务</h3><p>准备工作启动mysql 、redis、etcd。</p>
+<p>再启动user.go和applet.go</p>
+<p>查看user-rpc是否在etcd中注册</p>
+<pre><code class="shell">./etcdctl get --prefix user.rpc
+user.rpc/7587877843151607557
+192.168.123.58:8080
+</code></pre>
+<h3 id="短信验证"><a href="#短信验证" class="headerlink" title="短信验证"></a>短信验证</h3><pre><code class="shell"> get biz#activation#18729908763  #查看验证码
+&quot;210917&quot;
+get biz#verification#count#18729908763 #查看验证码次数每天最多只能验证10次
+&quot;1&quot;
+</code></pre>
+<h3 id="注册-登录-查看用户详情功能"><a href="#注册-登录-查看用户详情功能" class="headerlink" title="注册&amp;&amp;登录&amp;&amp;查看用户详情功能"></a>注册&amp;&amp;登录&amp;&amp;查看用户详情功能</h3><p><img src="https://telegraph-image-d8w.pages.dev/file/3f91624a27deeba6bd71a.png"></p>
+<p><img src="https://telegraph-image-d8w.pages.dev/file/89e4b71bf5c353ab9f44f.png"></p>
+<p><img src="https://telegraph-image-d8w.pages.dev/file/6594f04f856ffa6e9d1af.png"></p>
 
     </div>
     
