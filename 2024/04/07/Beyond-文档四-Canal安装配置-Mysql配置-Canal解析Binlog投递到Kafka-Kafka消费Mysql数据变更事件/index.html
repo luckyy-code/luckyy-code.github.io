@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>blog-operation | luckyy-code</title>
+    <title>Beyond 文档四 Canal安装配置 &amp; Mysql配置 &amp; Canal解析Binlog投递到Kafka &amp; Kafka消费Mysql数据变更事件 | luckyy-code</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -33,6 +33,10 @@
 
 
 <script src="/js/lib/preview.js"></script>
+
+
+
+
 
 
 
@@ -146,89 +150,131 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            <div id="archives">
-    
-    <div class="categories-tags">
-        
-        
-        
-        <span>
-            <a href="/tags/blog-operation/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                blog-operation
-            </a>
+            <div class="article">
+    <div>
+        <h1>Beyond 文档四 Canal安装配置 &amp; Mysql配置 &amp; Canal解析Binlog投递到Kafka &amp; Kafka消费Mysql数据变更事件</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/7
         </span>
         
         
-        
-        <span>
-            <a href="/tags/arch/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                arch
-            </a>
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #ff7d73">Beyond</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #00a596">golang</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ffa2c4">文档</a>
+            </span>
+            
         </span>
-        
-        
-        
-        <span>
-            <a href="/tags/Beyond/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                Beyond
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/golang/" style="background: #00bcd4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                golang
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/%E6%96%87%E6%A1%A3/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                文档
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/docekr/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                docekr
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/kafka/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                kafka
-            </a>
-        </span>
-        
         
     </div>
+    
+    <div class="content" v-pre>
+        <h3 id="Beyond-文档四-Canal安装配置-Mysql配置-Canal解析Binlog投递到Kafka-Kafka消费Mysql数据变"><a href="#Beyond-文档四-Canal安装配置-Mysql配置-Canal解析Binlog投递到Kafka-Kafka消费Mysql数据变" class="headerlink" title="Beyond 文档四 Canal安装配置 &amp; Mysql配置 &amp; Canal解析Binlog投递到Kafka &amp; Kafka消费Mysql数据变"></a>Beyond 文档四 Canal安装配置 &amp; Mysql配置 &amp; Canal解析Binlog投递到Kafka &amp; Kafka消费Mysql数据变</h3><span id="more"></span>
+
+
+
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><img src="https://telegraph-image-d8w.pages.dev/file/ff8cb1a17f8f334c49525.png" style="zoom:67%;" />
+
+<h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>下载 canal.deployer-xxx.tar.gz 包</p>
+<p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/alibaba/canal/releases">https://github.com/alibaba/canal/releases</a></p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><pre><code class="shell">mkdir -p /usr/local/canal
+
+cp canal.deployer-xxx.tar.gz /usr/local/canal
+
+tar -zxvf canal.deployer-xxx.tar.gz 
+</code></pre>
+<h3 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h3><h4 id="Mysql配置"><a href="#Mysql配置" class="headerlink" title="Mysql配置"></a>Mysql配置</h4><p>对于自建 MySQL , 需要先开启 Binlog 写入功能，配置 binlog-format 为 ROW 模式，my.cnf 中配置如下：</p>
+<pre><code class="yaml">[mysqld]
+log-bin=mysql-bin # 开启 binlog
+binlog-format=ROW # 选择 ROW 模式
+server_id=1 # 配置 MySQL replaction 需要定义，不要和 canal 的 slaveId 重复
+</code></pre>
+<p>授权 canal 链接 MySQL 账号具有作为 MySQL slave 的权限, 如果已有账户可直接 grant</p>
+<pre><code class="sql">CREATE USER canal IDENTIFIED BY &#39;canal&#39;;  
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;canal&#39;@&#39;%&#39;;
+-- GRANT ALL PRIVILEGES ON *.* TO &#39;canal&#39;@&#39;%&#39; ;
+FLUSH PRIVILEGES;
+</code></pre>
+<h3 id="修改instance配置文件"><a href="#修改instance配置文件" class="headerlink" title="修改instance配置文件"></a>修改instance配置文件</h3><pre><code class="shell">vim  canal/conf/example/instance.properties
+</code></pre>
+<pre><code class="yaml"># position info
+canal.instance.master.address=127.0.0.1:3306
+
+# username/password
+canal.instance.dbUsername=canal
+canal.instance.dbPassword=canal
+
+# mq config
+canal.mq.topic=topic-like-count
+canal.mq.partitionsNum=1
+#库名.表名: 唯一主键，多个表之间用逗号分隔
+canal.mq.partitionHash=beyond_like.like_count:id
+</code></pre>
+<h3 id="修改canal配置文件"><a href="#修改canal配置文件" class="headerlink" title="修改canal配置文件"></a>修改canal配置文件</h3><pre><code class="shell">vim canal/conf/canal.properties
+</code></pre>
+<pre><code class="yaml"># tcp, kafka, rocketMQ, rabbitMQ, pulsarMQ
+canal.serverMode = kafka
+
+##################################################
+#########                    Kafka                   #############
+##################################################
+kafka.bootstrap.servers = 127.0.0.1:9092
+</code></pre>
+<h3 id="启动canal"><a href="#启动canal" class="headerlink" title="启动canal"></a>启动canal</h3><pre><code>cd canal/
+
+sh bin/startup.sh
+</code></pre>
+<h3 id="停止canal"><a href="#停止canal" class="headerlink" title="停止canal"></a>停止canal</h3><pre><code class="shell">cd canal/
+
+sh bin/stop.sh
+</code></pre>
+<h3 id="创建topic"><a href="#创建topic" class="headerlink" title="创建topic"></a>创建topic</h3><pre><code class="shell">cd kafka/bin
+
+./kafka-topics.sh --create --topic topic-like-count --bootstrap-server localhost:9092
+</code></pre>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><ul>
+<li><p>启动mysql</p>
+</li>
+<li><p>启动kafka，创建topic</p>
+</li>
+<li><p>启动canal</p>
+</li>
+<li><p>对mysql做增删改查操作</p>
+</li>
+<li><p>查看kafka是否有数据</p>
+</li>
+</ul>
+<p><img src="https://telegraph-image-d8w.pages.dev/file/840bb7d166e828f8216e9.png"></p>
+<h4 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h4><p><img src="https://telegraph-image-d8w.pages.dev/file/5dd35aa7ed9ac885c8ebc.png"></p>
+<h4 id="查看kafka"><a href="#查看kafka" class="headerlink" title="查看kafka"></a>查看kafka</h4><p><img src="https://telegraph-image-d8w.pages.dev/file/505048f23fbecd4c1026d.png"></p>
+<h3 id="测试成功。"><a href="#测试成功。" class="headerlink" title="测试成功。"></a>测试成功。</h3>
+    </div>
+    
+    
+    
+    
+    
+    
     
 </div>
 
@@ -266,6 +312,12 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
 
     
 </body>

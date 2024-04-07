@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>blog-operation | luckyy-code</title>
+    <title>文档五 文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce | luckyy-code</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -33,6 +33,10 @@
 
 
 <script src="/js/lib/preview.js"></script>
+
+
+
+
 
 
 
@@ -146,89 +150,137 @@
 </transition>
 
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
-            <div id="archives">
-    
-    <div class="categories-tags">
-        
-        
-        
-        <span>
-            <a href="/tags/blog-operation/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                blog-operation
-            </a>
+            <div class="article">
+    <div>
+        <h1>文档五 文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/7
         </span>
         
         
-        
-        <span>
-            <a href="/tags/arch/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                arch
-            </a>
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #00a596">Beyond</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #00a596">文档</a>
+            </span>
+            
         </span>
-        
-        
-        
-        <span>
-            <a href="/tags/Beyond/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                Beyond
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/golang/" style="background: #00bcd4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                golang
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/%E6%96%87%E6%A1%A3/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                文档
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/docekr/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                docekr
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/kafka/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                kafka
-            </a>
-        </span>
-        
         
     </div>
+    
+    <div class="content" v-pre>
+        <h3 id="文章列表缓存-缓存代码-性能提升工具MapReduce"><a href="#文章列表缓存-缓存代码-性能提升工具MapReduce" class="headerlink" title="文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce"></a>文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce</h3><span id="more"></span>
+
+<h4 id="本项目缓存使用Redis"><a href="#本项目缓存使用Redis" class="headerlink" title="本项目缓存使用Redis"></a>本项目缓存使用Redis</h4><h3 id="缓存配置"><a href="#缓存配置" class="headerlink" title="缓存配置"></a>缓存配置</h3><pre><code>beyond/application/article/rpc/internal/config/config
+</code></pre>
+<pre><code class="go">type Config struct &#123;
+   zrpc.RpcServerConf
+   DataSource string
+   CacheRedis cache.CacheConf
+   BizRedis   redis.RedisConf
+&#125;
+</code></pre>
+<pre><code>beyond/application/article/rpc/etc/article.yaml
+</code></pre>
+<pre><code class="yaml">CacheRedis:
+  - Host: 127.0.0.1:6379
+    Pass:
+    Type: node
+BizRedis:
+  Host: 127.0.0.1:6379
+  Pass:
+  Type: node
+</code></pre>
+<h3 id="缓存初始化"><a href="#缓存初始化" class="headerlink" title="缓存初始化"></a>缓存初始化</h3><pre><code>beyond/application/article/rpc/internal/svc/servicecontext.go
+</code></pre>
+<pre><code class="go">type ServiceContext struct &#123;
+   Config       config.Config
+   ArticleModel model.ArticleModel
+   BizRedis     *redis.Redis
+&#125;
+
+func NewServiceContext(c config.Config) *ServiceContext &#123;
+   rds, err := redis.NewRedis(redis.RedisConf&#123;
+      Host: c.BizRedis.Host,
+      Pass: c.BizRedis.Pass,
+      Type: c.BizRedis.Type,
+   &#125;)
+   if err != nil &#123;
+      panic(err)
+   &#125;
+
+   return &amp;ServiceContext&#123;
+      Config:       c,
+      ArticleModel: model.NewArticleModel(sqlx.NewMysql(c.DataSource), c.CacheRedis),
+      BizRedis:     rds,
+   &#125;
+&#125;
+</code></pre>
+<h3 id="proto定义"><a href="#proto定义" class="headerlink" title="proto定义"></a>proto定义</h3><pre><code class="protobuf">service Article &#123;
+  rpc Articles(ArticlesRequest) returns (ArticlesResponse);
+&#125;
+
+message ArticlesRequest &#123;
+  int64 userId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+  int32 sortType = 4;
+  int64 articleId = 5;
+&#125;
+
+message ArticleItem &#123;
+  int64 Id = 1;
+  string title = 2;
+  string content = 3;
+  string description = 4;
+  string cover = 5;
+  int64 commentCount = 6;
+  int64 likeCount = 7;
+  int64 publishTime = 8;
+&#125;
+
+message ArticlesResponse &#123;
+  repeated ArticleItem articles = 1;
+  bool isEnd = 2;
+  int64 cursor = 3;
+  int64 articleId = 4;
+&#125;
+</code></pre>
+<h3 id="rpc服务生成"><a href="#rpc服务生成" class="headerlink" title="rpc服务生成"></a>rpc服务生成</h3><pre><code class="shell">cd beyond/application/article/rpc/pb
+goctl rpc protoc *.proto --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
+</code></pre>
+<h3 id="缓存自动生成"><a href="#缓存自动生成" class="headerlink" title="缓存自动生成"></a>缓存自动生成</h3><pre><code>cd beyond/application/article/rpc
+
+goctl model mysql datasource --dir ./internal/model --table &quot;*&quot; --cache true --url &quot;root:123456@tcp(0.0.0.0:3306)/beyond_article&quot;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
     
 </div>
 
@@ -266,6 +318,12 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
 
     
 </body>
