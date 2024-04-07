@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Beyond 文档七  go-zero中集成elasticsearch &amp; elasticsearch同步数据 &amp;&amp; 实现文章搜索功能 | luckyy-code</title>
+    <meta name="author" content="段雨超" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar.jpg" />
+
+
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>LUCKYY-CODE</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;LUCKYY-CODE</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>Beyond 文档七  go-zero中集成elasticsearch &amp; elasticsearch同步数据 &amp;&amp; 实现文章搜索功能</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/7
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #ffa2c4">Beyond</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ffa2c4">文档</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h4 id="go-zero中集成elasticsearch-elasticsearch同步数据-实现文章搜索功能"><a href="#go-zero中集成elasticsearch-elasticsearch同步数据-实现文章搜索功能" class="headerlink" title="go-zero中集成elasticsearch &amp; elasticsearch同步数据 &amp;&amp; 实现文章搜索功能"></a>go-zero中集成elasticsearch &amp; elasticsearch同步数据 &amp;&amp; 实现文章搜索功能</h4><span id="more"></span>
+
+<h3 id="elasticsearch安装"><a href="#elasticsearch安装" class="headerlink" title="elasticsearch安装"></a>elasticsearch安装</h3><h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>elasticsearch下载链接：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html</a></p>
+<p>kibana下载链接：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/current/install.html">https://www.elastic.co/guide/en/kibana/current/install.html</a></p>
+<h3 id="es解压"><a href="#es解压" class="headerlink" title="es解压"></a>es解压</h3><pre><code class="shell">tar -zxvf elasticsearch-8.10.4-darwin-x86_64.tar.gz 
+</code></pre>
+<h3 id="kibana解压"><a href="#kibana解压" class="headerlink" title="kibana解压"></a>kibana解压</h3><pre><code class="shell">tar -zxvf kibana-8.10.4-darwin-x86_64.tar.gz 
+</code></pre>
+<h3 id="启动-elasticsearch"><a href="#启动-elasticsearch" class="headerlink" title="启动 elasticsearch"></a>启动 elasticsearch</h3><pre><code class="shell">cd elasticsearch-7.17.19
+./bin/elasticsearch
+</code></pre>
+<p>验证是否成功</p>
+<ol>
+<li><p>浏览器输入： 127.0.0.1：9200</p>
+</li>
+<li><p>浏览器输出如下即表示安装启动成功</p>
+<pre><code class="json">&#123;
+&quot;name&quot;: &quot;myarch&quot;,
+&quot;cluster_name&quot;: &quot;elasticsearch&quot;,
+&quot;cluster_uuid&quot;: &quot;IszhX3WoRX-oZLiF6KOwSA&quot;,
+&quot;version&quot;: &#123;
+    &quot;number&quot;: &quot;7.17.19&quot;,
+    &quot;build_flavor&quot;: &quot;default&quot;,
+    &quot;build_type&quot;: &quot;tar&quot;,
+    &quot;build_hash&quot;: &quot;92f290e9537478f85ff3fe3ab39945c1a49a6c1a&quot;,
+    &quot;build_date&quot;: &quot;2024-03-21T14:34:38.216751500Z&quot;,
+    &quot;build_snapshot&quot;: false,
+    &quot;lucene_version&quot;: &quot;8.11.3&quot;,
+    &quot;minimum_wire_compatibility_version&quot;: &quot;6.8.0&quot;,
+    &quot;minimum_index_compatibility_version&quot;: &quot;6.0.0-beta1&quot;
+    &#125;,
+    &quot;tagline&quot;: &quot;You Know, for Search&quot;
+&#125;
+</code></pre>
+<h3 id="kibana启动"><a href="#kibana启动" class="headerlink" title="kibana启动"></a>kibana启动</h3><pre><code class="shell">cd kibana-7.17.19-linux-x86_64
+
+./bin/kibana
+</code></pre>
+<p>1.打开浏览器输入127.0.0.1：5601</p>
+<p>2.输出welocme to elastic表示启动成功</p>
+<img src="https://telegraph-image-d8w.pages.dev/file/452ba9fc7e15d215a524a.png" style="zoom:50%;" /></li>
+</ol>
+<p>​		</p>
+<h3 id="创建索引"><a href="#创建索引" class="headerlink" title="创建索引"></a>创建索引</h3><pre><code class="json">PUT /article-index
+&#123;
+    &quot;mappings&quot;: &#123;
+      &quot;properties&quot;: &#123;
+        &quot;article_id&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;title&quot;: &#123;
+            &quot;type&quot;: &quot;text&quot;
+        &#125;,
+        &quot;content&quot;: &#123;
+            &quot;type&quot;: &quot;text&quot;
+        &#125;,
+        &quot;description&quot;: &#123;
+            &quot;type&quot;: &quot;text&quot;
+        &#125;,
+        &quot;author_id&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;author_name&quot;: &#123;
+            &quot;type&quot;: &quot;keyword&quot;
+        &#125;,
+        &quot;status&quot;: &#123;
+            &quot;type&quot;: &quot;integer&quot;
+        &#125;,
+        &quot;comment_num&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;like_num&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;collect_num&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;view_num&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;share_num&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;tag_ids&quot;: &#123;
+            &quot;type&quot;: &quot;long&quot;
+        &#125;,
+        &quot;publish_time&quot;: &#123;
+            &quot;type&quot;: &quot;keyword&quot;
+        &#125;,
+        &quot;create_time&quot;: &#123;
+            &quot;type&quot;: &quot;keyword&quot;
+        &#125;,
+        &quot;update_time&quot;: &#123;
+            &quot;type&quot;: &quot;keyword&quot;
+        &#125;
+    &#125;
+  &#125;
+&#125;
+</code></pre>
+<h3 id="elasticsearch-go封装"><a href="#elasticsearch-go封装" class="headerlink" title="elasticsearch-go封装"></a>elasticsearch-go封装</h3><pre><code class="go">func NewEs(conf *Config) (*Es, error) &#123;
+   c := es8.Config&#123;
+      Addresses:  conf.Addresses,
+      Username:   conf.Username,
+      Password:   conf.Password,
+      MaxRetries: conf.MaxRetries,
+      Transport:  &amp;esTransport&#123;&#125;,
+   &#125;
+
+   client, err := es8.NewClient(c)
+   if err != nil &#123;
+      return nil, err
+   &#125;
+
+   return &amp;Es&#123;
+      Client: client,
+   &#125;, nil
+&#125;
+
+func MustNewEs(conf *Config) *Es &#123;
+   es, err := NewEs(conf)
+   if err != nil &#123;
+      panic(err)
+   &#125;
+
+   return es
+&#125;
+</code></pre>
+<h3 id="elasticsearch同步数据"><a href="#elasticsearch同步数据" class="headerlink" title="elasticsearch同步数据"></a>elasticsearch同步数据</h3><h4 id="Article-mq服务初始化"><a href="#Article-mq服务初始化" class="headerlink" title="Article-mq服务初始化"></a>Article-mq服务初始化</h4><pre><code class="go">type ServiceContext struct &#123;
+   Config       config.Config
+   ArticleModel model.ArticleModel
+   BizRedis     *redis.Redis
+   UserRPC      user.User
+   Es           *es.Es
+&#125;
+
+func NewServiceContext(c config.Config) *ServiceContext &#123;
+   rds, err := redis.NewRedis(redis.RedisConf&#123;
+      Host: c.BizRedis.Host,
+      Pass: c.BizRedis.Pass,
+      Type: c.BizRedis.Type,
+   &#125;)
+   if err != nil &#123;
+      panic(err)
+   &#125;
+
+   conn := sqlx.NewMysql(c.Datasource)
+   return &amp;ServiceContext&#123;
+      Config:       c,
+      ArticleModel: model.NewArticleModel(conn),
+      BizRedis:     rds,
+      UserRPC:      user.NewUser(zrpc.MustNewClient(c.UserRPC)),
+      Es: es.MustNewEs(&amp;es.Config&#123;
+         Addresses: c.Es.Addresses,
+         Username:  c.Es.Username,
+         Password:  c.Es.Password,
+      &#125;),
+   &#125;
+&#125;
+</code></pre>
+<h4 id="Article-mq配置定义"><a href="#Article-mq配置定义" class="headerlink" title="Article-mq配置定义"></a>Article-mq配置定义</h4><pre><code class="go">type Config struct &#123;
+   service.ServiceConf
+
+   KqConsumerConf        kq.KqConf
+   ArticleKqConsumerConf kq.KqConf
+   Datasource            string
+   BizRedis              redis.RedisConf
+   // es config
+   Es struct &#123;
+      Addresses []string
+      Username  string
+      Password  string
+   &#125;
+   UserRPC zrpc.RpcClientConf
+&#125;
+</code></pre>
+<h4 id="Article-mq配置文件"><a href="#Article-mq配置文件" class="headerlink" title="Article-mq配置文件"></a>Article-mq配置文件</h4><pre><code>Name: mq
+KqConsumerConf:
+  Name: article-kq-consumer
+  Brokers:
+    - 127.0.1:9092
+  Group: group-like-count
+  Topic: topic-like-count
+  Offset: last
+  Consumers: 1
+  Processors: 1
+ArticleKqConsumerConf:
+  Name: article-cache-kq-consumer
+  Brokers:
+    - 127.0.1:9092
+  Group: group-article-event
+  Topic: topic-article-event
+  Offset: last
+  Consumers: 1
+  Processors: 1
+Datasource: root:123456@tcp(0.0.0.0:3306)/beyond_article?parseTime=true
+BizRedis:
+  Host: 0.0.0.0:6379
+  Pass:
+  Type: node
+Es:
+  Addresses:
+    - http://localhost:9200/
+  Username: elastic
+  Password: 
+
+UserRPC:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+</code></pre>
+<h4 id="批量Upsert-es"><a href="#批量Upsert-es" class="headerlink" title="批量Upsert es"></a>批量Upsert es</h4><pre><code class="go">func (l *ArticleLogic) BatchUpSertToEs(ctx context.Context, data []*types.ArticleEsMsg) error &#123;
+   if len(data) == 0 &#123;
+      return nil
+   &#125;
+
+   bi, err := esutil.NewBulkIndexer(esutil.BulkIndexerConfig&#123;
+      Client: l.svcCtx.Es.Client,
+      Index:  &quot;article-index&quot;,
+   &#125;)
+   if err != nil &#123;
+      return err
+   &#125;
+
+   for _, d := range data &#123;
+      v, err := json.Marshal(d)
+      if err != nil &#123;
+         return err
+      &#125;
+
+      payload := fmt.Sprintf(`&#123;&quot;doc&quot;:%s,&quot;doc_as_upsert&quot;:true&#125;`, string(v))
+      err = bi.Add(ctx, esutil.BulkIndexerItem&#123;
+         Action:     &quot;update&quot;,
+         DocumentID: fmt.Sprintf(&quot;%d&quot;, d.ArticleId),
+         Body:       strings.NewReader(payload),
+         OnSuccess: func(ctx context.Context, item esutil.BulkIndexerItem, item2 esutil.BulkIndexerResponseItem) &#123;
+         &#125;,
+         OnFailure: func(ctx context.Context, item esutil.BulkIndexerItem, item2 esutil.BulkIndexerResponseItem, err error) &#123;
+         &#125;,
+      &#125;)
+      if err != nil &#123;
+         return err
+      &#125;
+   &#125;
+
+   return bi.Close(ctx)
+&#125;
+</code></pre>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><ul>
+<li><p>启动elasticsearch</p>
+</li>
+<li><p>启动kibana</p>
+<p>创建索引，查看索引，查看监控信</p>
+</li>
+<li><p>启动kafka</p>
+<p>创建topic，查看topic </p>
+</li>
+<li><p>启动canal</p>
+</li>
+<li><p>启动etcd</p>
+</li>
+<li><p>启动redis</p>
+</li>
+<li><p>启动mysql</p>
+</li>
+<li><p>启动user-rpc</p>
+</li>
+<li><p>启动article-mq</p>
+</li>
+<li><p>调用article-rcp  Publish接口发布文章</p>
+</li>
+<li><p>查看es数据</p>
+</li>
+</ul>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 luckyy-code
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;段雨超
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+    <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script type="text/javascript" src="/js/fireworks.js"></script>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
+
+    
+</body>
+</html>

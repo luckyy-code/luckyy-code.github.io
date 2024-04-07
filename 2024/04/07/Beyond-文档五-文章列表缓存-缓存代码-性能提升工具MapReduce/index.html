@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>文档五 文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce | luckyy-code</title>
+    <title>Beyond 文档五 文章列表缓存 &amp;&amp; 缓存代码 | luckyy-code</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -152,7 +152,7 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
     <div>
-        <h1>文档五 文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce</h1>
+        <h1>Beyond 文档五 文章列表缓存 &amp;&amp; 缓存代码</h1>
     </div>
     <div class="info">
         <span class="date">
@@ -171,17 +171,17 @@
             
             <span class="tag">
                 
-                <a href="/tags/Beyond/" style="color: #00a596">Beyond</a>
+                <a href="/tags/Beyond/" style="color: #00bcd4">Beyond</a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
+                <a href="/tags/golang/" style="color: #ffa2c4">golang</a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #00a596">文档</a>
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #00bcd4">文档</a>
             </span>
             
         </span>
@@ -189,7 +189,7 @@
     </div>
     
     <div class="content" v-pre>
-        <h3 id="文章列表缓存-缓存代码-性能提升工具MapReduce"><a href="#文章列表缓存-缓存代码-性能提升工具MapReduce" class="headerlink" title="文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce"></a>文章列表缓存 &amp;&amp; 缓存代码 &amp; 性能提升工具MapReduce</h3><span id="more"></span>
+        <h3 id="文章列表缓存-缓存代码"><a href="#文章列表缓存-缓存代码" class="headerlink" title="文章列表缓存 &amp;&amp; 缓存代码"></a>文章列表缓存 &amp;&amp; 缓存代码</h3><span id="more"></span>
 
 <h4 id="本项目缓存使用Redis"><a href="#本项目缓存使用Redis" class="headerlink" title="本项目缓存使用Redis"></a>本项目缓存使用Redis</h4><h3 id="缓存配置"><a href="#缓存配置" class="headerlink" title="缓存配置"></a>缓存配置</h3><pre><code>beyond/application/article/rpc/internal/config/config
 </code></pre>
@@ -269,9 +269,80 @@ message ArticlesResponse &#123;
 <h3 id="rpc服务生成"><a href="#rpc服务生成" class="headerlink" title="rpc服务生成"></a>rpc服务生成</h3><pre><code class="shell">cd beyond/application/article/rpc/pb
 goctl rpc protoc *.proto --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
 </code></pre>
-<h3 id="缓存自动生成"><a href="#缓存自动生成" class="headerlink" title="缓存自动生成"></a>缓存自动生成</h3><pre><code>cd beyond/application/article/rpc
+<h3 id="缓存自动生成"><a href="#缓存自动生成" class="headerlink" title="缓存自动生成"></a>缓存自动生成</h3><pre><code class="shell">cd beyond/application/article/rpc
 
 goctl model mysql datasource --dir ./internal/model --table &quot;*&quot; --cache true --url &quot;root:123456@tcp(0.0.0.0:3306)/beyond_article&quot;
+</code></pre>
+<h3 id="缓存索引"><a href="#缓存索引" class="headerlink" title="缓存索引"></a>缓存索引</h3><p>查看某个用户发布过的文章需要支持分页的，通过往上滑动可以不断地加载下一页，文章支持按照点赞数和发布时间倒序返回列表，使用游标的方式进行分页。</p>
+<p>怎么在缓存中存储用户的文章列表呢？我们使用Sorted Set来存储，member为文章的的id，即我们只在Sorted Set中存储缓存索引，查出缓存索引后，因为我们自动生成了以主键id索引为key的缓存，所以查出索引列表后我们再查询行记录缓存即可获取文章的详情，Sorted Set的score为文章的点赞数或者文章发布时间。</p>
+<p>下面我们一起来分析文章列表的逻辑该怎么写，首先先从缓存中读取当前页的文章id索引，调用cacheArticleList方法，注意，这里调用查询缓存方法忽略了error，为什么要忽略这个error呢，因为我们期望的是尽最大可能的给用户返回数据，也就是redis挂掉了的话那我们就会从数据库查询数据返回给用户，而不会因为redis挂掉而返回错误。</p>
+<pre><code class="go">articleIds, _ := l.cacheArticles(l.ctx, in.UserId, in.Cursor, in.PageSize, in.SortType)
+</code></pre>
+<p>cacheProductList方法实现如下，通过ZrevrangebyscoreWithScoresAndLimitCtx倒序从缓存中读数据，并限制读条数为分页大小</p>
+<pre><code class="go">func (l *ArticlesLogic) cacheArticles(ctx context.Context, uid, cursor, ps int64, sortType int32) ([]int64, error) &#123;
+   key := articlesKey(uid, sortType)
+   pairs, err := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(ctx, key, 0, cursor, 0, int(ps))
+   if err != nil &#123;
+      logx.Errorf(&quot;ZrevrangebyscoreWithScoresAndLimit key: %s error: %v&quot;, key, err)
+      return nil, err
+   &#125;
+   var ids []int64
+   for _, pair := range pairs &#123;
+      id, err := strconv.ParseInt(pair.Key, 10, 64)
+      if err != nil &#123;
+         logx.Errorf(&quot;strconv.ParseInt key: %s error: %v&quot;, pair.Key, err)
+         return nil, err
+      &#125;
+      ids = append(ids, id)
+   &#125;
+
+   return ids, nil
+&#125;
+</code></pre>
+<p>为了表示列表的结束，我们会在Sorted Set中设置一个结束标志符，该标志符的member为-1，score为0，所以我们在从缓存中查出数据后，需要判断数据的最后一条是否为-1，如果为-1的话说明列表已经加载到最后一页了，用户再滑动屏幕的话前端就不会再继续请求后端的接口了，逻辑如下，从缓存中查出数据后再根据主键id查询文章详情即可</p>
+<pre><code class="go">articleIds, _ := l.cacheArticles(l.ctx, in.UserId, in.Cursor, in.PageSize, in.SortType)
+if len(articleIds) == int(in.PageSize) &#123;
+   isCache = true
+   if articleIds[len(articleIds)-1] == -1 &#123;
+      isEnd = true
+   &#125;
+&#125;
+</code></pre>
+<p>如果从缓存中查出的数据为0条，那么我们就从数据库中查询该用户的文章数据，这里要注意从数据库查询数据的时候我们要限制查询的条数，我们默认一次查询200条，因为我们每页大小为20，200条可以让用户下翻10页，大多数情况下用户根本不会翻那么多页，所以我们不会全部加载以降低我们的缓存资源，当用户真的翻页超过10页后，我们再按需加载到缓存中</p>
+<pre><code class="go">func (m *customArticleModel) ArticlesByUserId(ctx context.Context, userId, likeNum int64, pubTime, sortField string, limit int) ([]*Article, error) &#123;
+   var (
+      err      error
+      sql      string
+      anyField any
+      articles []*Article
+   )
+   if sortField == &quot;like_num&quot; &#123;
+      anyField = likeNum
+      sql = fmt.Sprintf(&quot;select &quot;+articleRows+&quot; from &quot;+m.table+&quot; where user_id=? and like_num &lt; ? order by %s desc limit ?&quot;, sortField)
+   &#125; else &#123;
+      anyField = pubTime
+      sql = fmt.Sprintf(&quot;select &quot;+articleRows+&quot; from &quot;+m.table+&quot; where user_id=? and publish_time &lt; ? order by %s desc limit ?&quot;, sortField)
+   &#125;
+   err = m.QueryRowsNoCacheCtx(ctx, &amp;articles, sql, userId, anyField, limit)
+   if err != nil &#123;
+      return nil, err
+   &#125;
+
+   return articles, nil
+&#125;
+</code></pre>
+<p>最后，如果没有命中缓存的话，我们需要把从数据库查出的数据写入缓存，这里需要注意的是如果数据已经到了末尾需要加上数据结束的标识符，即val为-1，score为0，这里我们异步的写会缓存，因为写缓存并不是主逻辑，不需要等待完成，写失败也没有影响呢，通过异步方式降低接口耗时.</p>
+<pre><code class="go">if !isCache &#123;
+   threading.GoSafe(func() &#123;
+      if len(articles) &lt; types.DefaultLimit &amp;&amp; len(articles) &gt; 0 &#123;
+         articles = append(articles, &amp;model.Article&#123;Id: -1&#125;)
+      &#125;
+      err = l.addCacheArticles(l.ctx, articles, in.SortType)
+      if err != nil &#123;
+         logx.Errorf(&quot;addCacheArticles error: %v&quot;, err)
+      &#125;
+   &#125;)
+&#125;
 </code></pre>
 
     </div>
