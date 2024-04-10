@@ -1,0 +1,512 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Beyond 文档六 缓存一致性保证 &amp; 缓存击穿 &amp; 缓存穿透 &amp; 缓存雪崩 | luckyy-code</title>
+    <meta name="author" content="段雨超" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar.jpg" />
+
+
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>LUCKYY-CODE</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;LUCKYY-CODE</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>Beyond 文档六 缓存一致性保证 &amp; 缓存击穿 &amp; 缓存穿透 &amp; 缓存雪崩</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/7
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Beyond/" style="color: #ff7d73">Beyond</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/golang/" style="color: #03a9f4">golang</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%96%87%E6%A1%A3/" style="color: #ff7d73">文档</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h3 id="缓存一致性保证-缓存击穿-缓存穿透-缓存雪崩"><a href="#缓存一致性保证-缓存击穿-缓存穿透-缓存雪崩" class="headerlink" title="缓存一致性保证 &amp; 缓存击穿 &amp; 缓存穿透 &amp; 缓存雪崩"></a>缓存一致性保证 &amp; 缓存击穿 &amp; 缓存穿透 &amp; 缓存雪崩</h3><span id="more"></span>
+
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1><h2 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h2><p><img src="https://telegraph-image-d8w.pages.dev/file/05157ff6d93635fe4ba90.png"></p>
+<h3 id="kafka操作"><a href="#kafka操作" class="headerlink" title="kafka操作"></a>kafka操作</h3><h4 id="创建topic"><a href="#创建topic" class="headerlink" title="创建topic"></a>创建topic</h4><pre><code class="shell">./kafka-topics.sh --create --topic topic-article --bootstrap-server localhost:9092
+</code></pre>
+<h4 id="消费消息"><a href="#消费消息" class="headerlink" title="消费消息"></a>消费消息</h4><pre><code class="shell">./kafka-console-consumer.sh --topic topic-article --from-beginning --bootstrap-server localhost:9092
+</code></pre>
+<h3 id="Canal配置"><a href="#Canal配置" class="headerlink" title="Canal配置"></a>Canal配置</h3><h4 id="进入到配置目录"><a href="#进入到配置目录" class="headerlink" title="进入到配置目录"></a>进入到配置目录</h4><pre><code class="shell">cd canal/conf/example
+</code></pre>
+<h3 id="编辑-instance-properties"><a href="#编辑-instance-properties" class="headerlink" title="编辑 instance.properties"></a>编辑 instance.properties</h3><pre><code class="properties"># mq config
+# canal.mq.topic=topic-like-count
+# dynamic topic route by schema or table regex
+# canal.mq.dynamicTopic=mytest1.user,topic2:mytest2\\..*,.*\\..*
+canal.mq.dynamicTopic=topic-article:beyond_article,topic-beyond-like:beyond_like
+canal.mq.partition=0
+# hash partition config
+#canal.mq.enableDynamicQueuePartition=false
+canal.mq.partitionsNum=1
+#canal.mq.dynamicTopicPartitionNum=test.*:4,mycanal:6
+# canal.mq.partitionHash=beyond_like.like_count:id
+#  正则匹配，指定所有正则匹配的表对应的hash字段为id
+canal.mq.partitionHash=.*\\..*:id  
+</code></pre>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><pre><code class="shell">cd canal/
+
+sh bin/startup.sh
+</code></pre>
+<h3 id="article-rpc"><a href="#article-rpc" class="headerlink" title="article-rpc"></a>article-rpc</h3><h4 id="发布方法，发布完成后写redis缓存，同步写缓存保证实时性"><a href="#发布方法，发布完成后写redis缓存，同步写缓存保证实时性" class="headerlink" title="发布方法，发布完成后写redis缓存，同步写缓存保证实时性"></a>发布方法，发布完成后写redis缓存，同步写缓存保证实时性</h4><pre><code class="go">func (l *PublishLogic) Publish(in *pb.PublishRequest) (*pb.PublishResponse, error) &#123;
+   if in.UserId &lt;= 0 &#123;
+      return nil, code.UserIdInvalid
+   &#125;
+   if len(in.Title) == 0 &#123;
+      return nil, code.ArticleTitleCantEmpty
+   &#125;
+   if len(in.Content) == 0 &#123;
+      return nil, code.ArticleContentCantEmpty
+   &#125;
+   ret, err := l.svcCtx.ArticleModel.Insert(l.ctx, &amp;model.Article&#123;
+      AuthorId:    in.UserId,
+      Title:       in.Title,
+      Content:     in.Content,
+      Description: in.Description,
+      Cover:       in.Cover,
+      Status:      types.ArticleStatusVisible, // 正常逻辑不会这样写，这里为了演示方便
+      PublishTime: time.Now(),
+      CreateTime:  time.Now(),
+      UpdateTime:  time.Now(),
+   &#125;)
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;Publish Insert req: %v error: %v&quot;, in, err)
+      return nil, err
+   &#125;
+
+   articleId, err := ret.LastInsertId()
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;LastInsertId error: %v&quot;, err)
+      return nil, err
+   &#125;
+
+   var (
+      articleIdStr   = strconv.FormatInt(articleId, 10)
+      publishTimeKey = articlesKey(in.UserId, types.SortPublishTime)
+      likeNumKey     = articlesKey(in.UserId, types.SortLikeCount)
+   )
+   b, _ := l.svcCtx.BizRedis.ExistsCtx(l.ctx, publishTimeKey)
+   if b &#123;
+      _, err = l.svcCtx.BizRedis.ZaddCtx(l.ctx, publishTimeKey, time.Now().Unix(), articleIdStr)
+      if err != nil &#123;
+         logx.Errorf(&quot;ZaddCtx req: %v error: %v&quot;, in, err)
+      &#125;
+   &#125;
+   b, _ = l.svcCtx.BizRedis.ExistsCtx(l.ctx, likeNumKey)
+   if b &#123;
+      _, err = l.svcCtx.BizRedis.ZaddCtx(l.ctx, likeNumKey, 0, articleIdStr)
+      if err != nil &#123;
+         logx.Errorf(&quot;ZaddCtx req: %v error: %v&quot;, in, err)
+      &#125;
+   &#125;
+
+   return &amp;pb.PublishResponse&#123;ArticleId: articleId&#125;, nil
+&#125;
+</code></pre>
+<h4 id="删除方法，删除完成后删除redis缓存，同步写缓存保证实时性"><a href="#删除方法，删除完成后删除redis缓存，同步写缓存保证实时性" class="headerlink" title="删除方法，删除完成后删除redis缓存，同步写缓存保证实时性"></a>删除方法，删除完成后删除redis缓存，同步写缓存保证实时性</h4><pre><code class="go">func (l *ArticleDeleteLogic) ArticleDelete(in *pb.ArticleDeleteRequest) (*pb.ArticleDeleteResponse, error) &#123;
+   if in.UserId &lt;= 0 &#123;
+      return nil, code.UserIdInvalid
+   &#125;
+   if in.ArticleId &lt;= 0 &#123;
+      return nil, code.ArticleIdInvalid
+   &#125;
+   err := l.svcCtx.ArticleModel.UpdateArticleStatus(l.ctx, in.ArticleId, types.ArticleStatusUserDelete)
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;UpdateArticleStatus req: %v error: %v&quot;, in, err)
+      return nil, err
+   &#125;
+   _, err = l.svcCtx.BizRedis.ZremCtx(l.ctx, articlesKey(in.UserId, types.SortPublishTime), in.ArticleId)
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;ZremCtx req: %v error: %v&quot;, in, err)
+   &#125;
+   _, err = l.svcCtx.BizRedis.ZremCtx(l.ctx, articlesKey(in.UserId, types.SortLikeCount), in.ArticleId)
+   if err != nil &#123;
+      l.Logger.Errorf(&quot;ZremCtx req: %v error: %v&quot;, in, err)
+   &#125;
+
+   return &amp;pb.ArticleDeleteResponse&#123;&#125;, nil
+&#125;
+</code></pre>
+<h3 id="article-mq"><a href="#article-mq" class="headerlink" title="article-mq"></a>article-mq</h3><p>新增配置</p>
+<pre><code class="shell">beyond/application/article/mq/internal/config/config.go
+</code></pre>
+<pre><code class="go">type Config struct &#123;
+   KqConsumerConf        kq.KqConf
+   ArticleKqConsumerConf kq.KqConf
+   Datasource            string
+&#125;
+</code></pre>
+<h4 id="注册service"><a href="#注册service" class="headerlink" title="注册service"></a>注册service</h4><pre><code class="shell">beyond/application/article/mq/internal/logic/articlelikenumlogic.go
+</code></pre>
+<pre><code class="go">func Consumers(ctx context.Context, svcCtx *svc.ServiceContext) []service.Service &#123;
+   return []service.Service&#123;
+      kq.MustNewQueue(svcCtx.Config.KqConsumerConf, NewArticleLikeNumLogic(ctx, svcCtx)),
+      kq.MustNewQueue(svcCtx.Config.ArticleKqConsumerConf, NewArticleLogic(ctx, svcCtx)),
+   &#125;
+&#125;
+</code></pre>
+<h4 id="消费文章变更数据核心逻辑（异步处理，对缓存进行补偿）"><a href="#消费文章变更数据核心逻辑（异步处理，对缓存进行补偿）" class="headerlink" title="消费文章变更数据核心逻辑（异步处理，对缓存进行补偿）"></a>消费文章变更数据核心逻辑（异步处理，对缓存进行补偿）</h4><pre><code class="go">func (l *ArticleLogic) articleOperate(ctx context.Context, msg *types.CanalArticleMsg) error &#123;
+   if len(msg.Data) == 0 &#123;
+      return nil
+   &#125;
+   for _, d := range msg.Data &#123;
+      status, _ := strconv.Atoi(d.Status)
+      likNum, _ := strconv.ParseInt(d.LikeNum, 10, 64)
+
+      t, err := time.Parse(&quot;2006-01-02 15:04:05&quot;, d.PublishTime)
+      if err != nil &#123;
+         logx.Errorf(&quot;time.Parse time: %s error: %v&quot;, d.PublishTime, err)
+         continue
+      &#125;
+
+      publishTimeKey := articlesKey(d.AuthorId, 0)
+      likeNumKey := articlesKey(d.AuthorId, 1)
+
+      switch status &#123;
+      case types.ArticleStatusVisible:
+         b, _ := l.svcCtx.BizRedis.ExistsCtx(ctx, publishTimeKey)
+         if b &#123;
+            _, err = l.svcCtx.BizRedis.ZaddCtx(ctx, publishTimeKey, t.Local().Unix(), d.ID)
+            if err != nil &#123;
+               l.Logger.Errorf(&quot;ZaddCtx key: %s req: %v error: %v&quot;, publishTimeKey, d, err)
+            &#125;
+         &#125;
+         b, _ = l.svcCtx.BizRedis.ExistsCtx(ctx, likeNumKey)
+         if b &#123;
+            _, err = l.svcCtx.BizRedis.ZaddCtx(ctx, likeNumKey, likNum, d.ID)
+            if err != nil &#123;
+               l.Logger.Errorf(&quot;ZaddCtx key: %s req: %v error: %v&quot;, likeNumKey, d, err)
+            &#125;
+         &#125;
+      case types.ArticleStatusUserDelete:
+         _, err = l.svcCtx.BizRedis.ZremCtx(ctx, publishTimeKey, d.ID)
+         if err != nil &#123;
+            logx.Errorf(&quot;ZremCtx key: %s req: %v error: %v&quot;, publishTimeKey, d, err)
+         &#125;
+         _, err = l.svcCtx.BizRedis.ZremCtx(ctx, likeNumKey, d.ID)
+         if err != nil &#123;
+            logx.Errorf(&quot;ZremCtx key: %s req: %v error: %v&quot;, likeNumKey, d, err)
+         &#125;
+      &#125;
+   &#125;
+
+   return nil
+&#125;
+</code></pre>
+<h2 id="缓存异常处理"><a href="#缓存异常处理" class="headerlink" title="缓存异常处理"></a>缓存异常处理</h2><h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><p>缓存击穿是指访问某个非常热的数据，缓存不存在，导致大量的请求发送到了数据库，这会导致数据库压力陡增，缓存击穿经常发生在热点数据过期失效时.</p>
+<p>既然缓存击穿经常发生在热点数据过期失效的时候，那么我们不让缓存失效不就好了，每次查询缓存的时候使用Exists来判断key是否存在，如果存在就使用Expire给缓存续期，热点数据通过不断地续期也就不会过期了</p>
+<pre><code class="go">func (l *ArticlesLogic) cacheArticles(ctx context.Context, uid, cursor, ps int64, sortType int32) ([]int64, error) &#123;
+   key := articlesKey(uid, sortType)
+   b, err := l.svcCtx.BizRedis.ExistsCtx(ctx, key)
+   if err != nil &#123;
+      logx.Errorf(&quot;ExistsCtx key: %s error: %v&quot;, key, err)
+   &#125;
+   if b &#123;
+      err = l.svcCtx.BizRedis.ExpireCtx(ctx, key, articlesExpire)
+      if err != nil &#123;
+         logx.Errorf(&quot;ExpireCtx key: %s error: %v&quot;, key, err)
+      &#125;
+   &#125;
+   pairs, err := l.svcCtx.BizRedis.ZrevrangebyscoreWithScoresAndLimitCtx(ctx, key, 0, cursor, 0, int(ps))
+   if err != nil &#123;
+      logx.Errorf(&quot;ZrevrangebyscoreWithScoresAndLimit key: %s error: %v&quot;, key, err)
+      return nil, err
+   &#125;
+   var ids []int64
+   for _, pair := range pairs &#123;
+      id, err := strconv.ParseInt(pair.Key, 10, 64)
+      if err != nil &#123;
+         logx.Errorf(&quot;strconv.ParseInt key: %s error: %v&quot;, pair.Key, err)
+         return nil, err
+      &#125;
+      ids = append(ids, id)
+   &#125;
+
+   return ids, nil
+&#125;
+</code></pre>
+<p>还有一种简单有效的方法就是通过singleflight来控制，singleflight的原理是当同时有很多请求同时到来时，最终只有一个请求会最终访问到资源，其他请求都会等待结果然后返回。获取用户文章列表使用singleflight进行保护代码如下：</p>
+<pre><code class="go">v, err, _ := l.svcCtx.SingleFlightGroup.Do(fmt.Sprintf(&quot;ArticlesByUserId:%d:%d&quot;, in.UserId, in.SortType), func() (interface&#123;&#125;, error) &#123;
+   return l.svcCtx.ArticleModel.ArticlesByUserId(l.ctx, in.UserId, sortLikeNum, sortPublishTime, sortField, types.DefaultLimit)
+&#125;)
+if err != nil &#123;
+   logx.Errorf(&quot;ArticlesByUserId userId: %d sortField: %s error: %v&quot;, in.UserId, sortField, err)
+   return nil, err
+&#125;
+if v == nil &#123;
+   return &amp;pb.ArticlesResponse&#123;&#125;, nil
+&#125;
+</code></pre>
+<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><p>缓存穿透是指要访问的数据既不在缓存中，也不在数据库中，导致请求在访问缓存时，发生缓存缺失，再去访问数据库时，发现数据库中也没有要访问的数据。此时也就没办法从数据库中读出数据再写入缓存来服务后续的请求，类似的请求如果多的话就会给缓存和数据库带来巨大的压力。</p>
+<p>针对缓存穿透问题，解决办法其实很简单，就是缓存一个空值，避免每次都透传到数据库，缓存的时间可以设置短一点，比如1分钟，其实上文已经有提到了，当我们访问不存在的数据的时候，go-zero框架会帮我们自动加上空缓存，比如我们访问id为999的文章，该文章在数据库中是不存在的。</p>
+<pre><code class="go">func (l *ArticleDetailLogic) ArticleDetail(in *pb.ArticleDetailRequest) (*pb.ArticleDetailResponse, error) &#123;
+   article, err := l.svcCtx.ArticleModel.FindOne(l.ctx, in.ArticleId)
+   if err != nil &#123;
+      if err == sqlx.ErrNotFound &#123;
+         return &amp;pb.ArticleDetailResponse&#123;&#125;, nil
+      &#125;
+      return nil, err
+   &#125;
+
+   return &amp;pb.ArticleDetailResponse&#123;
+      Article: &amp;pb.ArticleItem&#123;
+         Id:    article.Id,
+         Title: article.Title,
+      &#125;,
+   &#125;, nil
+&#125;
+</code></pre>
+<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><p>缓存雪崩时指大量的的应用请求无法在Redis缓存中进行处理，紧接着应用将大量的请求发送到数据库，导致数据库被打挂，好惨呐！！缓存雪崩一般是由两个原因导致的，应对方案也不太一样。</p>
+<p><strong>第一个原因是</strong>：缓存中有大量的数据同时过期，导致大量的请求无法得到正常处理。</p>
+<p>针对大量数据同时失效带来的缓存雪崩问题，一般的解决方案是要避免大量的数据设置相同的过期时间，如果业务上的确有要求数据要同时失效，那么可以在过期时间上加一个较小的随机数，这样不同的数据过期时间不同，但差别也不大，避免大量数据同时过期，也基本能满足业务的需求。</p>
+<p><strong>第二个原因是</strong>：Redis出现了宕机，没办法正常响应请求了，这就会导致大量请求直接打到数据库，从而发生雪崩</p>
+<p>针对这类原因一般我们需要让我们的数据库支持熔断，让数据库压力比较大的时候就触发熔断，丢弃掉部分请求，当然熔断是对业务有损的。</p>
+<p>在go-zero的数据库客户端是支持熔断的，如下在ExecCtx方法中使用熔断进行保护</p>
+<pre><code class="go">func (db *commonSqlConn) ExecCtx(ctx context.Context, q string, args ...any) (
+   result sql.Result, err error) &#123;
+   ctx, span := startSpan(ctx, &quot;Exec&quot;)
+   defer func() &#123;
+      endSpan(span, err)
+   &#125;()
+
+   err = db.brk.DoWithAcceptable(func() error &#123;
+      var conn *sql.DB
+      conn, err = db.connProv()
+      if err != nil &#123;
+         db.onError(ctx, err)
+         return err
+      &#125;
+
+      result, err = exec(ctx, conn, q, args...)
+      return err
+   &#125;, db.acceptable)
+   if err == breaker.ErrServiceUnavailable &#123;
+      metricReqErr.Inc(&quot;Exec&quot;, &quot;breaker&quot;)
+   &#125;
+
+   return
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 luckyy-code
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;段雨超
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+    <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script type="text/javascript" src="/js/fireworks.js"></script>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
+
+    
+</body>
+</html>
