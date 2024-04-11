@@ -1,0 +1,496 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>MVCC 原理分析 | luckyy-code</title>
+    <meta name="author" content="段雨超" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar.jpg" />
+
+
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>LUCKYY-CODE</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;LUCKYY-CODE</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>MVCC 原理分析</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/11
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/Mysql/" style="color: #ff7d73">Mysql</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/MVCC/" style="color: #00a596">MVCC</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h2 id="MVCC-原理分析"><a href="#MVCC-原理分析" class="headerlink" title="MVCC 原理分析"></a>MVCC 原理分析</h2><span id="more"></span>
+
+
+
+<h2 id="1-什么是-MVCC"><a href="#1-什么是-MVCC" class="headerlink" title="1. 什么是 MVCC"></a>1. 什么是 MVCC</h2><p>MySQL 在并发访问数据库会造成的问题（脏读、不可重复读、幻读），而 MVCC 就是在尽量减少锁使用的情况下高效避免这些问题。</p>
+<p>MySQL 四大隔离级别：</p>
+<p><img src="https://static001.geekbang.org/infoq/4e/4e63accc4e538e526d70a5f822a8f6ae.png" alt="img"></p>
+<p>MVCC 全称 Multi-Version Concurrency Control，即多版本并发控制，主要是为了提高数据库的并发性能。</p>
+<p>同一行数据平时发生读写请求时，会上锁阻塞住。但 MVCC 用更好的方式去处理读写请求，<strong>做到在发生读写请求冲突时不用加锁</strong>。</p>
+<p>这个读是指的快照读，而不是当前读，当前读是一种加锁操作，是悲观锁。</p>
+<p>那它到底是怎么做到读写不用加锁的，快照读和当前读是指什么？</p>
+<h2 id="2-快照读和当前读"><a href="#2-快照读和当前读" class="headerlink" title="2. 快照读和当前读"></a>2. 快照读和当前读</h2><ul>
+<li><strong>快照读</strong></li>
+<li>快照读，读取的是<strong>快照数据</strong>，不加锁的普通 SELECT 都属于快照读。</li>
+</ul>
+<pre><code class="mysql">  SELECT * FROM table WHERE ...
+</code></pre>
+<p>复制代码</p>
+<ul>
+<li><strong>当前读</strong></li>
+<li>当前读就是读的是<strong>最新数据</strong>，而不是历史的数据，加锁的 SELECT，或者对数据进行增删改都会进行当前读。</li>
+</ul>
+<pre><code class="mysql">  SELECT * FROM table LOCK IN SHARE MODE;  SELECT FROM table FOR UPDATE;  INSERT INTO table values ...  DELETE FROM table WHERE ...  UPDATE table SET ...
+</code></pre>
+<p>复制代码</p>
+<h2 id="3-为什么使用-MVCC"><a href="#3-为什么使用-MVCC" class="headerlink" title="3. 为什么使用 MVCC"></a>3. 为什么使用 MVCC</h2><p><strong>在数据库并发场景中</strong>，只有<strong>读-读</strong>之间的操作才可以并发执行，<strong>读-写</strong>，<strong>写-读</strong>，<strong>写-写</strong>操作都要阻塞，这样就会导致 MySQL 的并发性能极差。</p>
+<p>采用了 MVCC 机制后，只有写写之间相互阻塞，其他三种操作都可以并行，这样就可以提高了 MySQL 的并发性能。</p>
+<p>也就是说 MVCC 具体解决了以下问题：</p>
+<ol>
+<li><code>并发读-写时</code>：可以做到读操作不阻塞写操作，同时写操作也不会阻塞读操作。</li>
+<li>解决<code>脏读</code>、<code>幻读</code>、<code>不可重复读</code>等事务隔离问题，但不能解决上面的<code>写-写</code>（需要加锁）问题。</li>
+</ol>
+<h2 id="4-MVCC-机制的原理"><a href="#4-MVCC-机制的原理" class="headerlink" title="4. MVCC 机制的原理"></a>4. MVCC 机制的原理</h2><p>它的实现原理主要是<code>版本链</code>，<code>undo日志</code> ，<code>Read View</code>来实现的。</p>
+<h3 id="4-1-版本链"><a href="#4-1-版本链" class="headerlink" title="4.1 版本链"></a>4.1 版本链</h3><p>在之前对 InnoDB 存储引擎的介绍了数据页的行格式，对于使用它的表来说，表中的聚簇索引都包含三个隐藏列：</p>
+<p><img src="https://static001.geekbang.org/infoq/30/307174b5cb93d388195c01cd1c3a0ab3.png" alt="img"></p>
+<p>现在有这样一张表：</p>
+<pre><code class="mysql">CREATE TABLE `user` (  `id` bigint NOT NULL COMMENT &#39;主键&#39;,  `name` varchar(20) DEFAULT NULL COMMENT &#39;姓名&#39;,  `sex` char(1) DEFAULT NULL COMMENT &#39;性别&#39;,  `age` varchar(10) DEFAULT NULL COMMENT &#39;年龄&#39;,  `url` varchar(40) DEFAULT NULL,  PRIMARY KEY (`id`),  KEY `suf_index_url` (`name`(3)) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+</code></pre>
+<p>复制代码</p>
+<p>插入如下一条数据：</p>
+<pre><code class="mysql">INSERT INTO `user` (`id`, `name`, `sex`, `age`, `url`) VALUES (&#39;1&#39;, &#39;ayue&#39;, &#39;1&#39;, &#39;18&#39;, &#39;https://javatv.net&#39;);
+</code></pre>
+<p>复制代码</p>
+<p>假设插入该记录的事务 id 为 60，那么此刻该条记录的示意图如下所示：</p>
+<p><img src="https://static001.geekbang.org/infoq/db/db444e892b8437a6e4a60c53b78b5f7a.png" alt="img"></p>
+<p>假设之后有两个事务 id 分别为 80、120 的事务对这条记录进行 UPDATE 操作，操作流程如下：</p>
+<p><img src="https://static001.geekbang.org/infoq/10/1013b5b1ee320474daeb0e20ce18ddb4.png" alt="img"></p>
+<p>每次对记录进行改动，都会记录一条 undo 日志，每条 undo 日志也都有一个 roll_pointer 属性（INSERT 操作对应的 undo 日志没有该属性，因为该记录并没有更早的版本），可以将这些 undo 日志都连起来，串成一个链表，所以现在的情况就像下图一样：</p>
+<p><img src="https://static001.geekbang.org/infoq/87/87486f656e61bd96585c3cf621646f81.png" alt="img"></p>
+<p>对该记录每次更新后，都会将旧值放到一条 undo 日志中，就算是该记录的一个旧版本，随着更新次数的增多，所有的版本都会被 roll_pointer 属性连接成一个链表，我们把这个链表称之为<strong>版本链</strong>，版本链的头节点就是当前记录最新的值。</p>
+<p>另外，每个版本中还包含生成该版本时对应的事务 id。于是可以利用这个记录的版本链来控制并发事务访问相同记录的行为，那么这种机制就被称之为<strong>多版本并发控制（MVCC）</strong>。</p>
+<h3 id="4-2-undo-日志"><a href="#4-2-undo-日志" class="headerlink" title="4.2 undo 日志"></a>4.2 undo 日志</h3><p>undo log 主要用于记录数据被<code>修改之前</code>的日志，在表信息修改之前先会把数据拷贝到<code>undo log</code>里。当<code>事务</code>进行<code>回滚时</code>可以通过 undo log 里的日志进行<code>数据还原</code>。</p>
+<p><strong>Undo log 的用途</strong>：</p>
+<ul>
+<li>保证<code>事务</code>进行<code>rollback</code>时的<code>原子性和一致性</code>，当事务进行<code>回滚</code>的时候可以用 undo log 的数据进行<code>恢复</code>。</li>
+<li>用于 MVCC<code>快照读</code>的数据，在 MVCC 多版本控制中，通过读取<code>undo log</code>的<code>历史版本数据</code>可以实现<code>不同事务版本号</code>都拥有自己<code>独立的快照数据版本</code>。</li>
+</ul>
+<p><strong>undo log 主要分为两种</strong>：</p>
+<ul>
+<li><code>insert undo log</code></li>
+<li>代表事务在 insert 新记录时产生的 undo log , 只在事务回滚时需要，并且在事务提交后可以被立即丢弃。</li>
+<li><code>update undo log</code></li>
+<li>事务在进行 update 或 delete 时产生的 undo log， 不仅在事务回滚时需要，在快照读时也需要。所以不能随便删除，只有在快速读或事务回滚不涉及该日志时，对应的日志才会被 purge 线程统一清除。</li>
+</ul>
+<h3 id="4-3-ReadView"><a href="#4-3-ReadView" class="headerlink" title="4.3 ReadView"></a>4.3 ReadView</h3><p>上面说到了，改动的记录都存在在 undo 日志中，那如果一个日志需要查询行记录，需要读取哪个版本的行记录呢？</p>
+<p>1️⃣ 对于使用 <code>READ UNCOMMITTED</code> 隔离级别的事务来说，由于<strong>可以读到未提交事务修改过的记录</strong>，所以直接读取记录的最新版本就好了。</p>
+<p>2️⃣ 对于使用 <code>SERIALIZABLE</code> 隔离级别的事务来说，InnoDB 使用<strong>加锁的方式来访问记录</strong>，不存在并发问题。</p>
+<p>3️⃣ 而对于使用 <code>READ COMMITTED</code> 和 <code>REPEATABLE READ</code> 隔离级别的事务来说，都<strong>必须保证读到</strong>已经<strong>提交</strong>了的事务修改过的记录，也就是说<strong>假如另一个事务已经修改了记录但是尚未提交，是不能直接读取最新版本的记录的</strong>。</p>
+<p>核心问题就是： <code>READ COMMITTED</code> 和 <code>REPEATABLE READ</code> 隔离级别在不可重复读和幻读上的区别在哪里？这两种隔离级别对应的<strong>不可重复读</strong>与<strong>幻读</strong>都是指<strong>同一个事务</strong>在两次读取记录时出现<strong>不一致</strong>的情况，这两种隔离级别关键是需要判断版本链中的哪个版本是当前事务可见的。</p>
+<p>ReadView 就是用来解决这个问题的，可以帮助我们解决可见性问题。 事务进行<strong>快照读</strong>操作的时候就会产生 Read View，它保存了<strong>当前事务开启时所有活跃的事务列表</strong>。</p>
+<p><strong>注</strong>：这里的活跃指的是<strong>未提交</strong>的事务。</p>
+<p>每一个事务在启动时，都会生成一个 ReadView，用来记录一些内容，ReadView 中主要包含 4 个比较重要的属性：</p>
+<p><img src="https://static001.geekbang.org/infoq/02/02faee6058687f9746e6772f3eb4f1b9.png" alt="img"></p>
+<p>其中，<code>max_trx_id</code>并不是指<code>m_ids</code>中的最大值，因为事务 id 是递增分配的，假如现在有 id 为 1，2，3 这三个事务，之后 id 为 3 的事务提交了。那么一个新的读事务在生成 ReadView 时，m_ids 就包括 1 和 2，<code>min_trx_id</code> 的值就是 1，<code>max_trx_id</code> 的值就是 4。</p>
+<p>再有了 ReadView 之后，在访问某条记录时，只需要按照下边的步骤判断记录的某个版本是否可见：</p>
+<ol>
+<li><code>trx_id = creator_trx_id</code> ，<strong>可访问</strong></li>
+<li>如果被访问版本的 trx_id 属性值与 ReadView 中的 creator_trx_id 值相同，意味着当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问。</li>
+<li><code>trx_id &lt; min_trx_id</code> ，<strong>可访问</strong></li>
+<li>如果被访问版本的 trx_id 属性值小于 ReadView 中的 min_trx_id 值，表明生成该版本的事务在当前事务生成 ReadView 前已经提交，所以该版本可以被当前事务访问。</li>
+<li><code>trx_id &gt;= max_trx_id</code> ，<strong>不可访问</strong></li>
+<li>如果被访问版本的 trx_id 属性值大于或等于 ReadView 中的 max_trx_id 值，表明生成该版本的事务在当前事务生成 ReadView 后才开启，所以该版本不可以被当前事务访问。</li>
+<li><code>min_trx_id &lt;= trx_id &lt; max_trx_id</code>，<strong>存在</strong> <code>**m_ids**</code> <strong>列表中不可访问</strong></li>
+<li>如果被访问版本的 trx_id 属性值在 ReadView 的 min_trx_id 和 max_trx_id 之间，那就需要判断一下 trx_id 属性值是不是在 m_ids 列表中，如果在，说明创建 ReadView 时生成该版本的事务还是活跃的，该版本不可以被访问；如果不在，说明创建 ReadView 时生成该版本的事务已经被提交，该版本可以被访问。</li>
+<li>某个版本的数据对当前事务不可见</li>
+<li>如果某个版本的数据对当前事务不可见的话，那就顺着版本链找到下一个版本的数据，继续按照上边的步骤判断可见性，依此类推，直到版本链中的最后一个版本。如果最后一个版本也不可见的话，那么就意味着该条记录对该事务完全不可见，查询结果就不包含该记录。</li>
+</ol>
+<p>在 MySQL 中，READ COMMITTED 和 REPEATABLE READ 隔离级别的的一个非常大的区别就是它们<strong>生成 ReadView 的时机不同</strong>。</p>
+<h3 id="4-4-RC-和-ReadView"><a href="#4-4-RC-和-ReadView" class="headerlink" title="4.4 RC 和 ReadView"></a>4.4 RC 和 ReadView</h3><p>在 READ COMMITTED 级别下每次<strong>读取数据前</strong>都生成一个 ReadView。</p>
+<p>假如现在系统里同时开启两个事务 id 分别为 80、120 的事务在执行，且使用 <code>READ COMMITTED</code> 隔离级别。</p>
+<p><strong>1️⃣ trx_id &#x3D; 80</strong></p>
+<pre><code class="mysql"># 查看当前隔离级别SHOW VARIABLES LIKE &#39;transaction_isolation&#39;;
+# 修改当前会话隔离级别为 READ COMMITTEDSET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+# 开启事务BEGIN
+UPDATE `user` SET `name` = &#39;a&#39; WHERE id = 1;
+UPDATE `user` SET `name` = &#39;y&#39; WHERE id = 1;
+</code></pre>
+<p>复制代码</p>
+<p>此刻，表 user 中 id 为 1 的记录得到的版本链表如下所示：</p>
+<p><img src="https://static001.geekbang.org/infoq/09/095b9eb49a46df62674684443cfe5cfb.png" alt="img"></p>
+<p>在不提交的情况下，使用 READ COMMITTED 隔离级别的事务去查询：</p>
+<pre><code># 查看当前隔离级别SHOW VARIABLES LIKE &#39;transaction_isolation&#39;;
+# 修改当前会话隔离级别为 READ COMMITTEDSET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+# 开启事务BEGIN
+SELECT * FROM `user` WHERE id = 1;
+</code></pre>
+<p>复制代码</p>
+<p>很明显，结果为<code>ayue</code>。</p>
+<p>对于这个查询语句的执行过程如下：</p>
+<p>在执行 SELECT 语句时会先生成一个 ReadView，ReadView 的 <code>m_ids</code> 列表的内容就是<code>[80, 120]</code>，<code>min_trx_id</code> 为 80，<code>max_trx_id</code> 为 121，由于这是一个 SELECT 语句，所以并不会产生 <code>creator_trx_id</code> ，因此我们可以默认它为 0。</p>
+<p>然后从版本链中挑选可见的记录，从图中可以看出，最新版本的列 name 的内容是<code>y</code>，该版本的 <code>trx_id = 80</code>，在 <code>m_ids</code> 列表内，不符合可见性要求，因此根据 <code>roll_pointer</code> 跳到下一个版本。</p>
+<p>而在下一个版本中，name 的值为<code>a</code>，该版本的 <code>trx_id = 80</code>，还是不符合可见性要求，因此根据 <code>roll_pointer</code> 跳到下一个版本。</p>
+<p>在这个版本中，name 的值为<code>ayue</code>，该版本的 <code>trx_id = 60</code>，符合可见性要求<code>trx_id &lt; min_trx_id</code>，所以返回给用户的版本就是这条列 name 为<code>ayue</code>的记录。</p>
+<p>然后，我们把事务  <code>trx_id = 80</code> 的事务<strong>提交（COMMIT）</strong>，然后再到事务 <code>trx_id = 120</code>的事务中更新一下表 user 中 id 为 1 的记录。</p>
+<p><strong>2️⃣ trx_id &#x3D; 120</strong></p>
+<pre><code class="mysql"># 查看当前隔离级别SHOW VARIABLES LIKE &#39;transaction_isolation&#39;;
+# 修改当前会话隔离级别为 READ COMMITTEDSET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+# 开启事务BEGIN
+UPDATE `user` SET `name` = &#39;u&#39; WHERE id = 1;
+UPDATE `user` SET `name` = &#39;e&#39; WHERE id = 1;
+</code></pre>
+<p>复制代码</p>
+<p>此刻，表 user 中 id 为 1 的记录得到的版本链表如下所示：</p>
+<p><img src="https://static001.geekbang.org/infoq/87/87486f656e61bd96585c3cf621646f81.png" alt="img"></p>
+<p>此时，<code>trx_id = 80</code>已提交，<code>trx_id = 120</code>未提交，使用 READ COMMITTED 隔离级别的事务去查询：</p>
+<pre><code class="mysql"># 查看当前隔离级别SHOW VARIABLES LIKE &#39;transaction_isolation&#39;;
+# 修改当前会话隔离级别为 READ COMMITTEDSET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+# 开启事务BEGIN
+SELECT * FROM `user` WHERE id = 1;
+</code></pre>
+<p>复制代码</p>
+<p>很明显，结果为<code>y</code>。</p>
+<p>此时，SELECT 语句又会单独生成一个 ReadView，且其中的 <code>m_ids</code> 的内容为<code>[120]</code>，因为<code>trx_id = 80</code>这个事务已经提交，所以再次生成快照的时候就不存在了。</p>
+<p>同理，此时按照可见性要求，在<code>trx_id = 120</code>的事务未提交的情况下，读到的数据为 <code>name = y</code>。</p>
+<p>而当事务 <code>trx_id = 120</code>也提交之后，再次去查询得到的就是正确结果了。</p>
+<p>总的来说就是，使用 <code>READ COMMITTED</code> 隔离级别的事务在每次查询开始时都会生成一个独立的 ReadView。</p>
+<p>总结一下：</p>
+<p><code>READ COMMITTED</code>，可能产生不可重复读的现象，如上面测试的情况：</p>
+<ol>
+<li>事务<code>trx_id = 80</code>和<code>trx_id = 120</code>同时开启的情况下，<code>trx_id = 80</code>提交了</li>
+</ol>
+<p><strong>整体流程</strong>：</p>
+<p><img src="https://static001.geekbang.org/infoq/0e/0e74c8e94ff5fe389fe373bb0f728046.png" alt="img"></p>
+<p>注：以上测试都是在 <code>READ COMMITTED</code> 级别下。</p>
+<h3 id="4-5-RR-和-ReadView"><a href="#4-5-RR-和-ReadView" class="headerlink" title="4.5 RR 和 ReadView"></a>4.5 RR 和 ReadView</h3><p>在 REPEATABLE READ 级别下在<strong>第一次</strong>读取数据时生成一个 ReadView。</p>
+<p>还是在同样的条件下，开启两个事务 <code>trx_id = 80  </code>和 <code>trx_id = 120</code>，流程同上，一模一样（SQL 语句和步骤），只是隔离级别为 RR。</p>
+<p>当事务<code>trx_id = 80  </code>执行修改操作并在提交之前，版本链表如下所示：</p>
+<p><img src="https://static001.geekbang.org/infoq/09/095b9eb49a46df62674684443cfe5cfb.png" alt="img"></p>
+<p>此时执行 SELECT 语句会先生成一个 ReadView，ReadView 的<code>m_ids</code> 列表的内容就是<code>[80,120]</code>，<code>min_trx_id = 80</code>，<code>max_trx_id = 121</code>，<code>creator_trx_id = 0</code>。</p>
+<p>根据可见性原则，此时的 <code>trx_id</code> 在<code>min_trx_id </code>和<code> max_trx_id</code>之间且在<code>m_ids</code> 列表中，不符合，所以会随着版本链往下找，直到<code>trx_id = 60</code>，找出的值为 <code>ayue</code>。</p>
+<p><strong>然后提交</strong>。</p>
+<p>提交之后在去事务<code>trx_id = 120  </code>中执行上述更新操作，版本链表如下所示：</p>
+<p><img src="https://static001.geekbang.org/infoq/87/87486f656e61bd96585c3cf621646f81.png" alt="img"></p>
+<p>由于之前在执行 SELECE 语句时已经生成过 ReadView 了，所以此时直接复用之前的 ReadView，之前的 ReadView 的 <code>m_ids</code> 列表的内容就是<code>[80, 120]</code>，<code>min_trx_id = 80</code>，<code>max_trx_id = 121</code>，<code>creator_trx_id = 0</code>。</p>
+<p>而当前的事务 id 为 120，在<code>min_trx_id </code>和<code> max_trx_id</code>之间且在<code>m_ids</code>列表中，所以不符合可见性原则，则会继续随着版本链往下找，当找到事务 id 为 80 时，同样不满足，所以继续往下直到<code>trx_id = 60</code>，满足条件，返回的值为 <code>ayue</code>。</p>
+<p><strong>所以说 RR 解决了不可重复读问题</strong>。</p>
+<h2 id="5-MVCC-下的幻读现象"><a href="#5-MVCC-下的幻读现象" class="headerlink" title="5. MVCC 下的幻读现象"></a>5. MVCC 下的幻读现象</h2><p>通过上面分分析我们知道，<code>REPEATABLE READ</code> 隔离级别下 MVCC 可以<strong>解决不可重复读</strong>问题。</p>
+<p>那么幻读呢？MVCC 是怎么解决的？</p>
+<p>幻读是一个事务按照某个相同条件多次读取记录时，后读取时读到了之前没有读到的记录，而这个记录来自另一个事务添加的新记录，也就是说幻读是指<strong>新插入的行</strong>。 如：</p>
+<blockquote>
+<p>银行 A 开启了一个事务窗口，查询当前系统中有没有 “ayue” 用户，发现没有，银行 B 也开启了一个事务窗口，查询当前系统中也没有 “ayue” 用户，银行 A 先创建 “ayue” 用户并且提交，由于可重复读取，银行 B 在一次事务中必须保证查询的数据一致性，因此查询不到 “ayue”，结果银行 B 窗口认为 “ayue” 没有被注册想注册 “ayue” 用户，就创建 “ayue” 用户结果发现系统提示 “ayue” 用户已经被注册”，但是在本次事务中又查询不到 “ayue”，就好像出现幻觉一样。</p>
+</blockquote>
+<p>为什么在 RR 级别下会出现幻读的情况呢？</p>
+<p>仍然上面的那条数据，此时我们先查询一下数据库：</p>
+<p><img src="https://static001.geekbang.org/infoq/61/617b7523a415b3798623eb748e60e290.png" alt="img"></p>
+<p>然后我们开启 2 个事务，事务 A 和事务 B。</p>
+<p><strong>1️⃣ 事务 A</strong></p>
+<pre><code class="mysql">BEGIN;
+SELECT * FROM `user` WHERE id = 2
+</code></pre>
+<p>复制代码</p>
+<p>很明显，这个时候数据表中并没有 <code>id = 2</code>的数据。</p>
+<p><img src="https://static001.geekbang.org/infoq/95/9532a1c453d77e15f939e43b4730908c.png" alt="img"></p>
+<p><strong>2️⃣ 事务 B</strong></p>
+<p>然后，我们在事务 B 中插入一条<code>id = 2</code>的数据。</p>
+<pre><code class="mysql">BEGIN;
+INSERT INTO `user` (`id`, `name`, `sex`, `age`, `url`) VALUES (&#39;2&#39;, &#39;ayue&#39;, &#39;1&#39;, &#39;18&#39;, &#39;https://javatv.net&#39;);
+COMMIT;
+</code></pre>
+<p>复制代码</p>
+<p>然后回到事务 A，执行：</p>
+<pre><code class="mysql">SELECT * FROM `user` WHERE id = 2;
+</code></pre>
+<p>复制代码</p>
+<p>此时为了保证 RR 下的可重复读，还是查询不到数据的。</p>
+<p>但是我们 A 事务下执行以下操作，却发现能够修改成功：</p>
+<pre><code class="mysql">UPDATE `user` SET name = &#39;a&#39; WHERE id = 2;
+</code></pre>
+<p>复制代码</p>
+<p><img src="https://static001.geekbang.org/infoq/96/96ef9e7f80890d41eb953e9f7516a85e.png" alt="img"></p>
+<p>再次在 A 事务下执行：</p>
+<pre><code class="mysql">SELECT * FROM `user` WHERE id = 2;
+</code></pre>
+<p>复制代码</p>
+<p><img src="https://static001.geekbang.org/infoq/50/50f58dd72d931823e4d404bcf806b9bd.png" alt="img"></p>
+<p>肿么肥事？事务 A 之前都不能查询出<code>id=2</code>的数据，现在竟然可以查到了，很明显出现了幻读现象。</p>
+<p>分析一下：</p>
+<p>在 REPEATABLE READ 隔离级别下，事务 A 第一次执行普通的 SELECT 语句时生成了一个 <strong>ReadView</strong>（且在 RR 下只会生成一个 RV），之后事务 B 向 user 表中新插入一条记录并提交。</p>
+<p>ReadView 并不能阻止事务 A 执行 UPDATE 或者 DELETE 语句来改动这个新插入的记录（由于事务 B 已经提交，因此改动该记录并不会造成阻塞），但是这样一来，这条新记录的 <code>trx_id</code> 隐藏列的值就变成了事务 A 的事务 id。之后 A 再使用普通的 SELECT 语句去查询这条记录时就可以看到这条记录了，也就可以把这条记录返回给客户端。</p>
+<p>因为这个特殊现象的存在，我们也可以认为 <strong>MVCC 并不能完全禁止幻读</strong>。</p>
+<h2 id="6-如何解决幻读"><a href="#6-如何解决幻读" class="headerlink" title="6. 如何解决幻读"></a>6. 如何解决幻读</h2><p>在<strong>第 2 点</strong>中，我们知道数据库的读操作分为<strong>当前读</strong>和<strong>快照读</strong>，而在 RR 隔离级别下，<strong>MVCC 解决了在快照读的情况下的幻读</strong>，而在实际场景中，我们可能需要读取实时的数据，比如在银行业务等特殊场景下，必须是需要读取到实时的数据，此时就不能快照读。</p>
+<p>那么有什么方法来解决这个问题呢？</p>
+<p>毫无疑问，在并发场景下，我们可以通过加锁的方式来实现当前读，而在 MySQL 中则是通过<code>Next-Key Locks</code>来解决幻读的问题。</p>
+<p><code>Next-Key Locks</code>包含两部分：记录锁（行锁，Record Lock），间隙锁（Gap Locks）。<strong>记录锁是加在索引上的锁，间隙锁是加在索引之间的</strong>。</p>
+<h3 id="6-1-Record-Lock"><a href="#6-1-Record-Lock" class="headerlink" title="6.1 Record Lock"></a>6.1 Record Lock</h3><p><strong>记录锁，单条索引记录上加锁</strong>。</p>
+<p>Record Lock 锁住的永远是索引，不包括记录本身，即使该表上没有任何索引，那么 innodb 会在后台创建一个隐藏的聚集主键索引，那么锁住的就是这个隐藏的聚集主键索引。</p>
+<p>记录锁是有 S 锁和 X 锁之分的，当一个事务获取了一条记录的 S 型记录锁后，其他事务也可以继续获取该记录的 S 型记录锁，但不可以继续获取 X 型记录锁；当一个事务获取了一条记录的 X 型记录锁后，其他事务既不可以继续获取该记录的 S 型记录锁，也不可以继续获取 X 型记录锁。</p>
+<h3 id="6-2-Gap-Locks"><a href="#6-2-Gap-Locks" class="headerlink" title="6.2 Gap Locks"></a>6.2 Gap Locks</h3><p>间隙锁，对索引前后的间隙上锁，不对索引本身上锁。前开后开区间。</p>
+<p>MySQL 在 REPEATABLE READ 隔离级别下是可以解决幻读问题的，解决方案有两种，可以使用 MVCC 方案解决，也可以采用加锁方案解决。但是在使用加锁方案解决时有问题，就是事务在第一次执行读取操作时，那些幻影记录尚 不存在，我们无法给这些幻影记录加上记录锁。所以我们可以使用间隙锁对其上锁。</p>
+<p>如存在这样一张表：</p>
+<pre><code class="mysql">CREATE TABLE test (  id INT (1) NOT NULL AUTO_INCREMENT,  number INT (1) NOT NULL COMMENT &#39;数字&#39;,  PRIMARY KEY (id),  KEY number (number) USING BTREE) ENGINE = INNODB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8;
+# 插入以下数据INSERT INTO test VALUES (1, 1); INSERT INTO test VALUES (5, 3); INSERT INTO test VALUES (7, 8); INSERT INTO test VALUES (11, 12);
+</code></pre>
+<p>复制代码</p>
+<p>如下：</p>
+<p>开启一个事务 A：</p>
+<pre><code class="mysql">BEGIN;
+SELECT * FROM test WHERE number = 3 FOR UPDATE;
+</code></pre>
+<p>复制代码</p>
+<p>此时，会对<code>((1,1),(5,3))</code>和<code>((5,3),(7,8))</code>之间上锁。</p>
+<p><img src="https://static001.geekbang.org/infoq/df/dfc1cb01bc8d215e2bebab2a0649dcb3.png" alt="img"></p>
+<p>如果此时在开启一个事务 B 进行插入数据，如下：</p>
+<pre><code class="mysql">BEGIN;
+# 阻塞INSERT INTO test (id, number) VALUES (2,2); 
+</code></pre>
+<p>复制代码</p>
+<p>结果如下：</p>
+<p><img src="https://static001.geekbang.org/infoq/0d/0ddf175869000a145aa9cd6c8badc944.png" alt="img"></p>
+<p>为什么不能插入？因为记录<code>(2,2)</code>要 插入的话，在索引 <code>number</code>上，刚好落在<code>((1,1),(5,3))</code>和<code>((5,3),(7,8))</code>之间，是有锁的，所以不允许插入。 如果在范围外，当然是可以插入的，如：</p>
+<pre><code class="mysql">INSERT INTO test (id, number) VALUES (8,8); 
+</code></pre>
+<p>复制代码</p>
+<p>另外，既然涉及到索引，那么<strong>索引对间隙锁会产生什么影响</strong>？</p>
+<ol>
+<li>对主键或唯一索引，如果当前读时，where 条件全部精确命中(&#x3D;或 in)，这种场景本身就不会出现幻读，所以只会加行记录锁，也就是说<strong>间隙锁会退化为行锁</strong>（记录锁）。</li>
+<li>非唯一索引列，如果 where 条件部分命中(&gt;、&lt;、like 等)或者全未命中，则会加附近间隙锁。例如，某表数据如下，非唯一索引<code>2,6,9,9,11,15</code>。如下语句要操作非唯一索引列 9 的数据，间隙锁将会锁定的列是(6,11]，该区间内无法插入数据。</li>
+<li>对于没有索引的列，当前读操作时，会加全表间隙锁，生产环境要注意。</li>
+</ol>
+<h3 id="6-3-Next-Key-Locks"><a href="#6-3-Next-Key-Locks" class="headerlink" title="6.3 Next-Key Locks"></a>6.3 Next-Key Locks</h3><p><code>next-key locks</code> 是索引记录上的记录锁和索引记录之前的间隙上的间隙锁的组合，包括记录本身，每个 <code>next-key locks</code> 是<strong>前开后闭区间</strong>（同样说明锁住的范围更大，影响并发度），也就是说<strong>间隙锁只是锁的间隙，没有锁住记录行，</strong><code>**next-key locks**</code> <strong>就是间隙锁基础上锁住右边界行</strong>。</p>
+<p>默认情况下，InnoDB 以 REPEATABLE READ 隔离级别运行。在这种情况下，InnoDB 使用 Next-Key Locks 锁进行搜索和索引扫描，这可以防止幻读的发生。</p>
+<h2 id="7-总结"><a href="#7-总结" class="headerlink" title="7. 总结"></a>7. 总结</h2><p>我们说 MVCC 在可重复读（RR）的隔离级别解决了以下问题：</p>
+<ol>
+<li><code>并发读-写时</code>：可以做到读操作不阻塞写操作，同时写操作也不会阻塞读操作；</li>
+<li>解决<code>脏读</code>、<code>幻读</code>、<code>不可重复读</code>等事务隔离问题。</li>
+</ol>
+<p>而对于 RR 和 RC 这两个隔离级别的不同：</p>
+<p>生成 ReadView 的时机不同，RC 在每一次进行普通 SELECT 操作前都会生成一个 ReadView，而 RR 只在第一次进行普通 SELECT 操作前生成一个 ReadView，之后的查询操作都重复使用这个 ReadView 就好了，从而基本上可以避免幻读现象。</p>
+<p>但是，对于幻读来说，还存在当前读和快照读的情况：</p>
+<ol>
+<li>RR 隔离级别下间隙锁才有效，<strong>RC 隔离级别下没有间隙锁</strong>；</li>
+<li>RR 隔离级别下为了解决幻读问题：<strong>快照读依靠 MVCC 控制，当前读通过间隙锁解决</strong>；</li>
+<li>间隙锁和行锁合称 Next-Key Locks，每个 Next-Key Locks 是前开后闭区间；</li>
+<li>间隙锁的引入，可能会导致同样语句锁住更大的范围，影响并发度。</li>
+</ol>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 luckyy-code
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;段雨超
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+    <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script type="text/javascript" src="/js/fireworks.js"></script>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
+
+    
+</body>
+</html>
