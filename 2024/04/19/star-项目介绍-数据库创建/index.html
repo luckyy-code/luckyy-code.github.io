@@ -1,0 +1,710 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>star一 项目介绍&amp;数据库创建 | luckyy-code</title>
+    <meta name="author" content="段雨超" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <link rel="icon" href="/images/avatar.jpg" />
+
+
+    <link rel="preconnect" href="https://s4.zstatic.net" />
+<script src="https://s4.zstatic.net/ajax/libs/vue/3.3.7/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://s4.zstatic.net/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.loli.net" />
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Fira+Code:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" />
+<script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+
+<script src="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://s4.zstatic.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://s4.zstatic.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
+
+
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+    <div id="layout">
+        <transition name="fade">
+            <div id="loading" v-show="loading">
+                <div id="loading-circle">
+                    <h2>LOADING</h2>
+                    <p>加载过慢请开启缓存 浏览器默认开启</p>
+                    <img src="/images/loading.gif" />
+                </div>
+            </div>
+        </transition>
+        <div id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <nav id="desktop-menu">
+        <a class="title" href="/">
+            <span>LUCKYY-CODE</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </nav>
+    <nav id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;LUCKYY-CODE</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </nav>
+</div>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+        <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
+            <div class="article">
+    <div>
+        <h1>star一 项目介绍&amp;数据库创建</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2024/4/19
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            
+            <span class="tag">
+                
+                <a href="/tags/java/" style="color: #00bcd4">java</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/star/" style="color: #ffa2c4">star</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h3 id="star-一-项目介绍-数据库创建"><a href="#star-一-项目介绍-数据库创建" class="headerlink" title="star 一 项目介绍&amp;数据库创建"></a>star 一 项目介绍&amp;数据库创建</h3><span id="more"></span>
+
+
+
+<h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><pre><code class="shell">[feng@myarch star]$ tree -L 1 
+. 
+├── pom.xml 
+├── sky-common 
+├── sky-pojo 
+└── sky-server
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>sky-common</td>
+<td>子模块，存放公共类，例如：工具类、常量类、异常类等</td>
+</tr>
+<tr>
+<td>2</td>
+<td>sky-pojo</td>
+<td>子模块，存放实体类、VO、DTO等</td>
+</tr>
+<tr>
+<td>3</td>
+<td>sky-server</td>
+<td>子模块，后端服务，存放配置文件、Controller、Service、Mapper等</td>
+</tr>
+</tbody></table>
+<pre><code class="shell"> com
+          └── sky
+             ├── constant
+             ├── context
+             ├── enumeration
+             ├── exception
+             ├── json
+             ├── properties
+             ├── result
+             └── utils
+</code></pre>
+<p>分析sky-common模块的每个包的作用：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>constant</td>
+<td>存放相关常量类</td>
+</tr>
+<tr>
+<td>context</td>
+<td>存放上下文类</td>
+</tr>
+<tr>
+<td>enumeration</td>
+<td>项目的枚举类存储</td>
+</tr>
+<tr>
+<td>exception</td>
+<td>存放自定义异常类</td>
+</tr>
+<tr>
+<td>json</td>
+<td>处理json转换的类</td>
+</tr>
+<tr>
+<td>properties</td>
+<td>存放SpringBoot相关的配置属性类</td>
+</tr>
+<tr>
+<td>result</td>
+<td>返回结果类的封装</td>
+</tr>
+<tr>
+<td>utils</td>
+<td>常用工具类</td>
+</tr>
+</tbody></table>
+<pre><code class="shell"> com
+    └── sky
+        ├──  
+        ├── dto
+        ├── entity
+        └── vo
+</code></pre>
+<p>分析sky-pojo模块的每个包的作用：</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Entity</td>
+<td>实体，通常和数据库中的表对应</td>
+</tr>
+<tr>
+<td>DTO</td>
+<td>数据传输对象，通常用于程序中各层之间传递数据</td>
+</tr>
+<tr>
+<td>VO</td>
+<td>视图对象，为前端展示数据提供的对象</td>
+</tr>
+<tr>
+<td>POJO</td>
+<td>普通Java对象，只有属性和对应的getter和setter</td>
+</tr>
+</tbody></table>
+<pre><code class="shell"> com
+    │   │   └── sky
+    │   │       ├── annotation
+    │   │       ├── aspect
+    │   │       ├── config
+    │   │       ├── controller
+    │   │       ├── handler
+    │   │       ├── interceptor
+    │   │       ├── mapper
+    │   │       ├── service
+    │   │       ├── SkyApplication.class
+    │   │       ├── task
+    │   │       └── websocket
+</code></pre>
+<p>分析sky-server模块的每个包的作用：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>config</td>
+<td>存放配置类</td>
+</tr>
+<tr>
+<td>controller</td>
+<td>存放controller类</td>
+</tr>
+<tr>
+<td>interceptor</td>
+<td>存放拦截器类</td>
+</tr>
+<tr>
+<td>mapper</td>
+<td>存放mapper接口</td>
+</tr>
+<tr>
+<td>service</td>
+<td>存放service类</td>
+</tr>
+<tr>
+<td>SkyApplication</td>
+<td>启动类</td>
+</tr>
+</tbody></table>
+<h3 id="数据库创建"><a href="#数据库创建" class="headerlink" title="数据库创建"></a>数据库创建</h3><pre><code class="sql">CREATE DATABASE IF NOT EXISTS `sky_take_out` ;
+USE `sky_take_out`;
+ DROP TABLE IF EXISTS `address_book`;
+CREATE TABLE `address_book` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`user_id` bigint NOT NULL COMMENT &#39;用户id&#39;,
+`consignee` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;收货人&#39;,
+`sex` varchar(2) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;性别&#39;,
+`phone` varchar(11) COLLATE utf8_bin NOT NULL COMMENT &#39;手机号&#39;,
+`province_code` varchar(12) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;省级区
+编号&#39;,
+`province_name` varchar(32) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;省级
+称&#39;,
+`city_code` varchar(12) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;市级区划编号&#39;,
+`city_name` varchar(32) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;市级名称&#39;,
+`district_code` varchar(12) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;区级区划
+号&#39;,
+`district_name` varchar(32) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;区级名称&#39;,
+`detail` varchar(200) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;详细地址&#39;,
+`label` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT &#39;标签&#39;,
+`is_default` tinyint(1) NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;默认 0 否 1是&#39;,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;地址簿&#39;;
+ DROP TABLE IF EXISTS `category`;
+CREATE TABLE `category` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`type` int DEFAULT NULL COMMENT &#39;类型 1 菜品分类 2 套餐分类&#39;,
+`name` varchar(32) COLLATE utf8_bin NOT NULL COMMENT &#39;分类名称&#39;,
+`sort` int NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;顺序&#39;,
+`status` int DEFAULT NULL COMMENT &#39;分类状态 0:禁用,1:启用&#39;,
+`create_time` datetime DEFAULT NULL COMMENT &#39;创建时间&#39;,
+`update_time` datetime DEFAULT NULL COMMENT &#39;更新时间&#39;,
+`create_user` bigint DEFAULT NULL COMMENT &#39;创建人&#39;,
+`update_user` bigint DEFAULT NULL COMMENT &#39;修改人&#39;,
+PRIMARY KEY (`id`),
+UNIQUE KEY `idx_category_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_binCOMMENT=&#39;菜品及套餐分类&#39;;
+ INSERT INTO `category` VALUES (11,1,&#39;酒水饮料&#39;,10,1,&#39;2022-06-09 22:09:18&#39;,&#39;2022-06-09
+22:09:18&#39;,1,1);
+INSERT INTO `category` VALUES (12,1,&#39;传统主食&#39;,9,1,&#39;2022-06-09 22:09:32&#39;,&#39;2022-06-09
+22:18:53&#39;,1,1);
+INSERT INTO `category` VALUES (13,2,&#39;人气套餐&#39;,12,1,&#39;2022-06-09 22:11:38&#39;,&#39;2022-06-10
+11:04:40&#39;,1,1);
+INSERT INTO `category` VALUES (15,2,&#39;商务套餐&#39;,13,1,&#39;2022-06-09 22:14:10&#39;,&#39;2022-06-10
+11:04:48&#39;,1,1);
+INSERT INTO `category` VALUES (16,1,&#39;蜀味烤鱼&#39;,4,1,&#39;2022-06-09 22:15:37&#39;,&#39;2022-08-31
+14:27:25&#39;,1,1);
+INSERT INTO `category` VALUES (17,1,&#39;蜀味牛蛙&#39;,5,1,&#39;2022-06-09 22:16:14&#39;,&#39;2022-08-31
+14:39:44&#39;,1,1);
+INSERT INTO `category` VALUES (18,1,&#39;特色蒸菜&#39;,6,1,&#39;2022-06-09 22:17:42&#39;,&#39;2022-06-09
+22:17:42&#39;,1,1);
+INSERT INTO `category` VALUES (19,1,&#39;新鲜时蔬&#39;,7,1,&#39;2022-06-09 22:18:12&#39;,&#39;2022-06-09
+22:18:28&#39;,1,1);
+INSERT INTO `category` VALUES (20,1,&#39;水煮鱼&#39;,8,1,&#39;2022-06-09 22:22:29&#39;,&#39;2022-06-09
+22:23:45&#39;,1,1);
+INSERT INTO `category` VALUES (21,1,&#39;汤类&#39;,11,1,&#39;2022-06-10 10:51:47&#39;,&#39;2022-06-10 10:51:47&#39;
+1,1);
+ DROP TABLE IF EXISTS `dish`;
+CREATE TABLE `dish` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`name` varchar(32) COLLATE utf8_bin NOT NULL COMMENT &#39;菜品名称&#39;,
+`category_id` bigint NOT NULL COMMENT &#39;菜品分类id&#39;,
+`price` decimal(10,2) DEFAULT NULL COMMENT &#39;菜品价格&#39;,
+`image` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;图片&#39;,
+`description` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;描述信息&#39;,
+`status` int DEFAULT &#39;1&#39; COMMENT &#39;0 停售 1 起售&#39;,
+`create_time` datetime DEFAULT NULL COMMENT &#39;创建时间&#39;,
+`update_time` datetime DEFAULT NULL COMMENT &#39;更新时间&#39;,
+`create_user` bigint DEFAULT NULL COMMENT &#39;创建人&#39;,
+`update_user` bigint DEFAULT NULL COMMENT &#39;修改人&#39;,
+PRIMARY KEY (`id`),
+UNIQUE KEY `idx_dish_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;菜品&#39;; INSERT INTO `dish` VALUES (46,&#39;王老吉&#39;,11,6.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/41bfcacf-7ad4-4927-8b26-df366553a94c.png&#39;,&#39;&#39;,1,&#39;2022-06-09
+22:40:47&#39;,&#39;2022-06-09 22:40:47&#39;,1,1);
+INSERT INTO `dish` VALUES (47,&#39;北冰洋&#39;,11,4.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/4451d4be-89a2-4939-9c69-3a87151cb979.png&#39;,&#39;还是小时候的味道&#39;
+1,&#39;2022-06-10 09:18:49&#39;,&#39;2022-06-10 09:18:49&#39;,1,1);
+INSERT INTO `dish` VALUES (48,&#39;雪花啤酒&#39;,11,4.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/bf8cbfc1-04d2-40e8-9826-061ee41ab87c.png&#39;,&#39;&#39;,1,&#39;2022-06-10
+09:22:54&#39;,&#39;2022-06-10 09:22:54&#39;,1,1);
+INSERT INTO `dish` VALUES (49,&#39;米饭&#39;,12,2.00,&#39;https://sky-itcast.oss-cn-beijing.aliyuncs.com
+76752350-2121-44d2-b477-10791c23a8ec.png&#39;,&#39;精选五常大米&#39;,1,&#39;2022-06-10
+09:30:17&#39;,&#39;2022-06-10 09:30:17&#39;,1,1);
+INSERT INTO `dish` VALUES (50,&#39;馒头&#39;,12,1.00,&#39;https://sky-itcast.oss-cn-beijing.aliyuncs.com
+475cc599-8661-4899-8f9e-121dd8ef7d02.png&#39;,&#39;优质面粉&#39;,1,&#39;2022-06-10 09:34:28&#39;,&#39;2022-06-10
+09:34:28&#39;,1,1);
+INSERT INTO `dish` VALUES (51,&#39;老坛酸菜鱼&#39;,20,56.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/4a9cefba-6a74-467e-9fde-6e687ea725d7.png&#39;,&#39;原料:汤,草鱼,酸菜&#39;
+1,&#39;2022-06-10 09:40:51&#39;,&#39;2022-06-10 09:40:51&#39;,1,1);
+INSERT INTO `dish` VALUES (52,&#39;经典酸菜鮰鱼&#39;,20,66.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/5260ff39-986c-4a97-8850-2ec8c7583efc.png&#39;,&#39;原料:酸菜,江团,鮰鱼&#39;
+1,&#39;2022-06-10 09:46:02&#39;,&#39;2022-06-10 09:46:02&#39;,1,1);
+INSERT INTO `dish` VALUES (53,&#39;蜀味水煮草鱼&#39;,20,38.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/a6953d5a-4c18-4b30-9319-4926ee77261f.png&#39;,&#39;原料:草鱼,汤&#39;
+1,&#39;2022-06-10 09:48:37&#39;,&#39;2022-06-10 09:48:37&#39;,1,1);
+INSERT INTO `dish` VALUES (54,&#39;清炒小油菜&#39;,19,18.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/3613d38e-5614-41c2-90ed-ff175bf50716.png&#39;,&#39;原料:小油菜&#39;
+1,&#39;2022-06-10 09:51:46&#39;,&#39;2022-06-10 09:51:46&#39;,1,1);
+INSERT INTO `dish` VALUES (55,&#39;蒜蓉娃娃菜&#39;,19,18.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/4879ed66-3860-4b28-ba14-306ac025fdec.png&#39;,&#39;原料:蒜,娃娃菜&#39;
+1,&#39;2022-06-10 09:53:37&#39;,&#39;2022-06-10 09:53:37&#39;,1,1);
+INSERT INTO `dish` VALUES (56,&#39;清炒西兰花&#39;,19,18.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/e9ec4ba4-4b22-4fc8-9be0-4946e6aeb937.png&#39;,&#39;原料:西兰花&#39;
+1,&#39;2022-06-10 09:55:44&#39;,&#39;2022-06-10 09:55:44&#39;,1,1);
+INSERT INTO `dish` VALUES (57,&#39;炝炒圆白菜&#39;,19,18.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/22f59feb-0d44-430e-a6cd-6a49f27453ca.png&#39;,&#39;原料:圆白菜&#39;
+1,&#39;2022-06-10 09:58:35&#39;,&#39;2022-06-10 09:58:35&#39;,1,1);
+INSERT INTO `dish` VALUES (58,&#39;清蒸鲈鱼&#39;,18,98.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/c18b5c67-3b71-466c-a75a-e63c6449f21c.png&#39;,&#39;原料:鲈鱼&#39;
+1,&#39;2022-06-10 10:12:28&#39;,&#39;2022-06-10 10:12:28&#39;,1,1);INSERT INTO `dish` VALUES (59,&#39;东坡肘子&#39;,18,138.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/a80a4b8c-c93e-4f43-ac8a-856b0d5cc451.png&#39;,&#39;原料:猪肘棒&#39;
+1,&#39;2022-06-10 10:24:03&#39;,&#39;2022-06-10 10:24:03&#39;,1,1);
+INSERT INTO `dish` VALUES (60,&#39;梅菜扣肉&#39;,18,58.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/6080b118-e30a-4577-aab4-45042e3f88be.png&#39;,&#39;原料:猪肉,梅菜&#39;
+1,&#39;2022-06-10 10:26:03&#39;,&#39;2022-06-10 10:26:03&#39;,1,1);
+INSERT INTO `dish` VALUES (61,&#39;剁椒鱼头&#39;,18,66.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/13da832f-ef2c-484d-8370-5934a1045a06.png&#39;,&#39;原料:鲢鱼,剁椒&#39;
+1,&#39;2022-06-10 10:28:54&#39;,&#39;2022-06-10 10:28:54&#39;,1,1);
+INSERT INTO `dish` VALUES (62,&#39;金汤酸菜牛蛙&#39;,17,88.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/7694a5d8-7938-4e9d-8b9e-2075983a2e38.png&#39;,&#39;原料:鲜活牛蛙,酸菜&#39;
+1,&#39;2022-06-10 10:33:05&#39;,&#39;2022-06-10 10:33:05&#39;,1,1);
+INSERT INTO `dish` VALUES (63,&#39;香锅牛蛙&#39;,17,88.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/f5ac8455-4793-450c-97ba-173795c34626.png&#39;,&#39;配料:鲜活牛蛙,莲藕
+青笋&#39;,1,&#39;2022-06-10 10:35:40&#39;,&#39;2022-06-10 10:35:40&#39;,1,1);
+INSERT INTO `dish` VALUES (64,&#39;馋嘴牛蛙&#39;,17,88.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/7a55b845-1f2b-41fa-9486-76d187ee9ee1.png&#39;,&#39;配料:鲜活牛蛙,丝瓜
+黄豆芽&#39;,1,&#39;2022-06-10 10:37:52&#39;,&#39;2022-06-10 10:37:52&#39;,1,1);
+INSERT INTO `dish` VALUES (65,&#39;草鱼2斤&#39;,16,68.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/b544d3ba-a1ae-4d20-a860-81cb5dec9e03.png&#39;,&#39;原料:草鱼,黄豆芽
+莲藕&#39;,1,&#39;2022-06-10 10:41:08&#39;,&#39;2022-06-10 10:41:08&#39;,1,1);
+INSERT INTO `dish` VALUES (66,&#39;江团鱼2斤&#39;,16,119.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/a101a1e9-8f8b-47b2-afa4-1abd47ea0a87.png&#39;,&#39;配料:江团鱼,黄豆芽
+莲藕&#39;,1,&#39;2022-06-10 10:42:42&#39;,&#39;2022-06-10 10:42:42&#39;,1,1);
+INSERT INTO `dish` VALUES (67,&#39;鮰鱼2斤&#39;,16,72.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/8cfcc576-4b66-4a09-ac68-ad5b273c2590.png&#39;,&#39;原料:鮰鱼,黄豆芽,
+藕&#39;,1,&#39;2022-06-10 10:43:56&#39;,&#39;2022-06-10 10:43:56&#39;,1,1);
+INSERT INTO `dish` VALUES (68,&#39;鸡蛋汤&#39;,21,4.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/c09a0ee8-9d19-428d-81b9-746221824113.png&#39;,&#39;配料:鸡蛋,紫菜&#39;
+1,&#39;2022-06-10 10:54:25&#39;,&#39;2022-06-10 10:54:25&#39;,1,1);
+INSERT INTO `dish` VALUES (69,&#39;平菇豆腐汤&#39;,21,6.00,&#39;https://sky-itcast.oss-cn
+beijing.aliyuncs.com/16d0a3d6-2253-4cfc-9b49-bf7bd9eb2ad2.png&#39;,&#39;配料:豆腐,平菇&#39;
+1,&#39;2022-06-10 10:55:02&#39;,&#39;2022-06-10 10:55:02&#39;,1,1);
+ DROP TABLE IF EXISTS `dish_flavor`;
+CREATE TABLE `dish_flavor` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`dish_id` bigint NOT NULL COMMENT &#39;菜品&#39;,
+`name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;口味名称&#39;,
+`value` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;口味数据list&#39;,PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;菜品口味关系表&#39;;
+ INSERT INTO `dish_flavor` VALUES (40,10,&#39;甜味&#39;,&#39;[\&quot;无糖\&quot;,\&quot;少糖\&quot;,\&quot;半糖\&quot;,\&quot;多糖\&quot;,\&quot;全糖\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (41,7,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (42,7,&#39;温度&#39;,&#39;[\&quot;热饮\&quot;,\&quot;常温\&quot;,\&quot;去冰\&quot;,\&quot;少冰\&quot;,\&quot;多冰\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (45,6,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (46,6,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (47,5,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (48,5,&#39;甜味&#39;,&#39;[\&quot;无糖\&quot;,\&quot;少糖\&quot;,\&quot;半糖\&quot;,\&quot;多糖\&quot;,\&quot;全糖\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (49,2,&#39;甜味&#39;,&#39;[\&quot;无糖\&quot;,\&quot;少糖\&quot;,\&quot;半糖\&quot;,\&quot;多糖\&quot;,\&quot;全糖\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (50,4,&#39;甜味&#39;,&#39;[\&quot;无糖\&quot;,\&quot;少糖\&quot;,\&quot;半糖\&quot;,\&quot;多糖\&quot;,\&quot;全糖\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (51,3,&#39;甜味&#39;,&#39;[\&quot;无糖\&quot;,\&quot;少糖\&quot;,\&quot;半糖\&quot;,\&quot;多糖\&quot;,\&quot;全糖\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (52,3,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (86,52,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (87,52,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (88,51,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (89,51,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (92,53,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (93,53,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (94,54,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (95,56,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (96,57,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (97,60,&#39;忌口&#39;,&#39;[\&quot;不要葱\&quot;,\&quot;不要蒜\&quot;,\&quot;不要香菜\&quot;,\&quot;不要
+\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (101,66,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (102,67,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+INSERT INTO `dish_flavor` VALUES (103,65,&#39;辣度&#39;,&#39;[\&quot;不辣\&quot;,\&quot;微辣\&quot;,\&quot;中辣\&quot;,\&quot;重辣\&quot;]&#39;);
+ DROP TABLE IF EXISTS `employee`;
+CREATE TABLE `employee` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`name` varchar(32) COLLATE utf8_bin NOT NULL COMMENT &#39;姓名&#39;,
+`username` varchar(32) COLLATE utf8_bin NOT NULL COMMENT &#39;用户名&#39;,`password` varchar(64) COLLATE utf8_bin NOT NULL COMMENT &#39;密码&#39;,
+`phone` varchar(11) COLLATE utf8_bin NOT NULL COMMENT &#39;手机号&#39;,
+`sex` varchar(2) COLLATE utf8_bin NOT NULL COMMENT &#39;性别&#39;,
+`id_number` varchar(18) COLLATE utf8_bin NOT NULL COMMENT &#39;身份证号&#39;,
+`status` int NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;状态 0:禁用,1:启用&#39;,
+`create_time` datetime DEFAULT NULL COMMENT &#39;创建时间&#39;,
+`update_time` datetime DEFAULT NULL COMMENT &#39;更新时间&#39;,
+`create_user` bigint DEFAULT NULL COMMENT &#39;创建人&#39;,
+`update_user` bigint DEFAULT NULL COMMENT &#39;修改人&#39;,
+PRIMARY KEY (`id`),
+UNIQUE KEY `idx_username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;员工信息&#39;;
+ INSERT INTO `employee` VALUES (1,&#39;管
+员&#39;,&#39;admin&#39;,&#39;123456&#39;,&#39;13812312312&#39;,&#39;1&#39;,&#39;110101199001010047&#39;,1,&#39;2022-02-15
+15:51:20&#39;,&#39;2022-02-17 09:16:20&#39;,10,1);
+ DROP TABLE IF EXISTS `order_detail`;
+CREATE TABLE `order_detail` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;名字&#39;,
+`image` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;图片&#39;,
+`order_id` bigint NOT NULL COMMENT &#39;订单id&#39;,
+`dish_id` bigint DEFAULT NULL COMMENT &#39;菜品id&#39;,
+`setmeal_id` bigint DEFAULT NULL COMMENT &#39;套餐id&#39;,
+`dish_flavor` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;口味&#39;,
+`number` int NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;数量&#39;,
+`amount` decimal(10,2) NOT NULL COMMENT &#39;金额&#39;,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;订单明细表&#39;;
+ DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`number` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;订单号&#39;,
+`status` int NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;订单状态 1待付款 2待接单 3已接单 4派送中 
+已完成 6已取消 7退款&#39;,
+`user_id` bigint NOT NULL COMMENT &#39;下单用户&#39;,`address_book_id` bigint NOT NULL COMMENT &#39;地址id&#39;,
+`order_time` datetime NOT NULL COMMENT &#39;下单时间&#39;,
+`checkout_time` datetime DEFAULT NULL COMMENT &#39;结账时间&#39;,
+`pay_method` int NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;支付方式 1微信,2支付宝&#39;,
+`pay_status` tinyint NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;支付状态 0未支付 1已支付 2退款&#39;,
+`amount` decimal(10,2) NOT NULL COMMENT &#39;实收金额&#39;,
+`remark` varchar(100) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;备注&#39;,
+`phone` varchar(11) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;手机号&#39;,
+`address` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;地址&#39;,
+`user_name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;用户名称&#39;,
+`consignee` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;收货人&#39;,
+`cancel_reason` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;订单取消原因&#39;,
+`rejection_reason` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;订单拒绝原因&#39;,
+`cancel_time` datetime DEFAULT NULL COMMENT &#39;订单取消时间&#39;,
+`estimated_delivery_time` datetime DEFAULT NULL COMMENT &#39;预计送达时间&#39;,
+`delivery_status` tinyint(1) NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;配送状态 1立即送出 0选择
+体时间&#39;,
+`delivery_time` datetime DEFAULT NULL COMMENT &#39;送达时间&#39;,
+`pack_amount` int DEFAULT NULL COMMENT &#39;打包费&#39;,
+`tableware_number` int DEFAULT NULL COMMENT &#39;餐具数量&#39;,
+`tableware_status` tinyint(1) NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;餐具数量状态 1按餐量提供 
+0选择具体数量&#39;,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;订单表&#39;;
+ DROP TABLE IF EXISTS `setmeal`;
+CREATE TABLE `setmeal` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`category_id` bigint NOT NULL COMMENT &#39;菜品分类id&#39;,
+`name` varchar(32) COLLATE utf8_bin NOT NULL COMMENT &#39;套餐名称&#39;,
+`price` decimal(10,2) NOT NULL COMMENT &#39;套餐价格&#39;,
+`status` int DEFAULT &#39;1&#39; COMMENT &#39;售卖状态 0:停售 1:起售&#39;,
+`description` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;描述信息&#39;,
+`image` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;图片&#39;,
+`create_time` datetime DEFAULT NULL COMMENT &#39;创建时间&#39;,
+`update_time` datetime DEFAULT NULL COMMENT &#39;更新时间&#39;,
+`create_user` bigint DEFAULT NULL COMMENT &#39;创建人&#39;,
+`update_user` bigint DEFAULT NULL COMMENT &#39;修改人&#39;,
+PRIMARY KEY (`id`),UNIQUE KEY `idx_setmeal_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;套餐&#39;;
+ DROP TABLE IF EXISTS `setmeal_dish`;
+CREATE TABLE `setmeal_dish` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`setmeal_id` bigint DEFAULT NULL COMMENT &#39;套餐id&#39;,
+`dish_id` bigint DEFAULT NULL COMMENT &#39;菜品id&#39;,
+`name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;菜品名称 (冗余字段)&#39;,
+`price` decimal(10,2) DEFAULT NULL COMMENT &#39;菜品单价(冗余字段)&#39;,
+`copies` int DEFAULT NULL COMMENT &#39;菜品份数&#39;,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;套餐菜品关系&#39;;
+ DROP TABLE IF EXISTS `shopping_cart`;
+CREATE TABLE `shopping_cart` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;商品名称&#39;,
+`image` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;图片&#39;,
+`user_id` bigint NOT NULL COMMENT &#39;主键&#39;,
+`dish_id` bigint DEFAULT NULL COMMENT &#39;菜品id&#39;,
+`setmeal_id` bigint DEFAULT NULL COMMENT &#39;套餐id&#39;,
+`dish_flavor` varchar(50) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;口味&#39;,
+`number` int NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;数量&#39;,
+`amount` decimal(10,2) NOT NULL COMMENT &#39;金额&#39;,
+`create_time` datetime DEFAULT NULL COMMENT &#39;创建时间&#39;,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;购物车&#39;;
+ DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+`id` bigint NOT NULL AUTO_INCREMENT COMMENT &#39;主键&#39;,
+`openid` varchar(45) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;微信用户唯一标识&#39;,
+`name` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;姓名&#39;,
+`phone` varchar(11) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;手机号&#39;,
+`sex` varchar(2) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;性别&#39;,
+`id_number` varchar(18) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;身份证号&#39;,`avatar` varchar(500) COLLATE utf8_bin DEFAULT NULL COMMENT &#39;头像&#39;,
+`create_time` datetime DEFAULT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin
+COMMENT=&#39;用户信息&#39;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+            <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2024 luckyy-code
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;段雨超
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+        </div>
+        
+        <transition name="fade">
+            <div id="preview" ref="preview" v-show="previewShow">
+                <img id="preview-content" ref="previewContent" />
+            </div>
+        </transition>
+        
+    </div>
+
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+    <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script type="text/javascript" src="/js/fireworks.js"></script>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/lib/fireworks.js>"></script>
+
+    
+    
+
+
+
+
+    
+</body>
+</html>
