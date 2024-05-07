@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>docker常用命令 | luckyy-code</title>
+    <title>go 编译成可执行文件 | luckyy-code</title>
     <meta name="author" content="段雨超" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -152,14 +152,14 @@
         <div id="main" :class="loading ? 'into-enter-from': 'into-enter-active'">
             <div class="article">
     <div>
-        <h1>docker常用命令</h1>
+        <h1>go 编译成可执行文件</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            2024/4/6
+            2024/5/7
         </span>
         
         
@@ -171,7 +171,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/docekr/" style="color: #03a9f4">docekr</a>
+                <a href="/tags/golang/" style="color: #00bcd4">golang</a>
             </span>
             
         </span>
@@ -179,58 +179,9 @@
     </div>
     
     <div class="content" v-pre>
-        <p>Docker常用命令</p>
-<span id="more"></span>
+        <h3 id="go-编译成可执行文件"><a href="#go-编译成可执行文件" class="headerlink" title="go 编译成可执行文件"></a>go 编译成可执行文件</h3><span id="more"></span>
 
-<h3 id=""><a href="#" class="headerlink" title=""></a></h3><pre><code class="shell">
-docker pull centos:7 #拉取镜像
-
-docker tag f5a6b296b8a2 docker.io/fengjay/nginx:v1.0.1 #docker 打标签 (重命名)
-
-docker push fengjay/alpine:latest # docker 推送远程
-
-docker rmi fengjay/alpine:latest #docker 删除镜像
-
-
-
-docker rmi -f fengjay/alpine:latest #强制删除
-
-docker ps #查看所有运行的容器
-docker ps -a #查看所有的容器
- #运行容器
--i 表示启动一个可交互的容器,并持续打开标准输入
--t 表示使用终端关联到容器的标准输入输出上
--d 后台运行删除容器
--- name表示定义容器唯一名称
--rm 推出后删除
-
-docker run [(-ti)option] --name 容器名称 centos:7 /bin/bash
-#exit 退出容器并停止
-#ctrl + p + q 退出容器不停止
-docker exec -ti 容器名称或id /bin/bash #进入容器
-
-docker start 容器名称或id #启动  
-docker stop 容器名称或id #停止 
-docker restart 容器名称或id #重启 
-
-docker rm 容器名称或id #删除容器
-docker logs 容器名称或id #查看日志
-
-docker commit 容器名称或id docker.io/fengjay/mycentos  #容器转换为镜像
-
-docker save id &gt; 文件名.tar #镜像导出本地
-
-docker load &lt; 文件名.tar #镜像导入
-
-##数据拷贝
-
-docker cp 主机目录 容器id:容器目录
-
-把目录里的东西拷贝的容器中
-
-docker cp .容器id:容器目录
-
-docker run -ti -d --rm -p 81:80 id  #docker 端口映射
+<pre><code class="go"> CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o pocketbase  main.go
 </code></pre>
 
     </div>
